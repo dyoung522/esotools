@@ -17,7 +17,11 @@ func FindMods() ([]string, error) {
 		return nil, err
 	}
 
-	addonsPath := filepath.Join(filepath.Clean(esoHome), "live", "AddOns")
+	var addonsPath = filepath.Join(filepath.Clean(esoHome), "live", "AddOns")
+
+	if fileInfo, err := os.Stat(addonsPath); err != nil || !fileInfo.IsDir() {
+		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", esoHome)
+	}
 
 	fmt.Println("Searching", addonsPath)
 

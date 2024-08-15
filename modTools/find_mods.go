@@ -5,7 +5,11 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/afero"
 )
+
+var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
 
 func FindMods() ([]string, error) {
 	var err error
@@ -19,13 +23,13 @@ func FindMods() ([]string, error) {
 
 	var addonsPath = filepath.Join(filepath.Clean(esoHome), "live", "AddOns")
 
-	if fileInfo, err := os.Stat(addonsPath); err != nil || !fileInfo.IsDir() {
+	if ok, err := afero.DirExists(AppFs, addonsPath); !ok || err != nil {
 		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", esoHome)
 	}
 
 	fmt.Println("Searching", addonsPath)
 
-	err = filepath.WalkDir(addonsPath, func(path string, d fs.DirEntry, err error) error { return getModList(path, &mods, err) })
+	err = afero.Walk(AppFs, addonsPath, func(path string, info fs.FileInfo, err error) error { return getModList(path, &mods, err) })
 	if err != nil {
 		return mods, err
 	}

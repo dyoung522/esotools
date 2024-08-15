@@ -13,20 +13,15 @@ func FindMods() ([]string, error) {
 
 	esoHome, ok := os.LookupEnv("ESO_HOME")
 	if !ok {
-		fmt.Println("Please set the ESO_HOME environment variable and try again.")
-		os.Exit(1)
+		err = fmt.Errorf("please set the ESO_HOME environment variable and try again")
+		return nil, err
 	}
 
 	addonsPath := filepath.Join(filepath.Clean(esoHome), "live", "AddOns")
 
 	fmt.Println("Searching", addonsPath)
 
-	absPath, err := filepath.Abs(addonsPath)
-	if err != nil {
-		return mods, err
-	}
-
-	err = filepath.WalkDir(absPath, func(path string, d fs.DirEntry, err error) error { return getModList(path, &mods, err) })
+	err = filepath.WalkDir(addonsPath, func(path string, d fs.DirEntry, err error) error { return getModList(path, &mods, err) })
 	if err != nil {
 		return mods, err
 	}

@@ -3,23 +3,24 @@ package modTools
 import (
 	"fmt"
 	"io/fs"
-	"os"
 	"path/filepath"
 
 	"github.com/spf13/afero"
+	"github.com/spf13/viper"
 )
 
 func FindMods() ([]string, error) {
 	var err error
 	var mods []string
 
-	esoHome, ok := os.LookupEnv("ESO_HOME")
-	if !ok {
+	// esoHome, ok := os.LookupEnv("ESO_HOME")
+	esoHome := string(viper.GetString("ESO_HOME"))
+	if esoHome == "" {
 		err = fmt.Errorf("please set the ESO_HOME environment variable and try again")
 		return nil, err
 	}
 
-	var addonsPath = filepath.Join(filepath.Clean(esoHome), "live", "AddOns")
+	var addonsPath = filepath.Join(filepath.Clean(string(esoHome)), "live", "AddOns")
 
 	if ok, err := afero.DirExists(AppFs, addonsPath); !ok || err != nil {
 		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", esoHome)

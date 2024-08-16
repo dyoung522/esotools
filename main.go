@@ -3,18 +3,27 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	"github.com/dyoung522/esotools/modTools"
 )
 
 func main() {
-	mods, err := modTools.FindMods()
+	modlist, err := modTools.FindMods()
 
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	fmt.Printf("%v\n", strings.Join(mods, "\n"))
+	mods, errs := modTools.ReadMods(&modlist)
+	_ = mods
+
+	if len(errs) > 0 {
+		for _, e := range errs {
+			fmt.Println(e)
+		}
+		os.Exit(1)
+	}
+
+	fmt.Println(mods.Print())
 }

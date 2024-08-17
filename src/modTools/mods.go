@@ -21,7 +21,7 @@ type modMeta struct {
 	dependency bool
 }
 
-func (M *modMeta) String() string {
+func (M modMeta) String() string {
 	return fmt.Sprintf("[dir: %v, dependency: %v]", M.dir, M.dependency)
 }
 
@@ -42,15 +42,15 @@ func NewMod(key string) Mod {
 	return Mod{key: ToKey(key)}
 }
 
-func (M *Mod) String() string {
+func (M Mod) String() string {
 	return M.Header()
 }
 
-func (M *Mod) Markdown() string {
+func (M Mod) Markdown() string {
 	return fmt.Sprintf("- %s (v%s) by %v", M.Title, M.Version, M.Author)
 }
 
-func (M *Mod) Header() string {
+func (M Mod) Header() string {
 	return fmt.Sprintf(
 		"## Title: %s\n"+
 			"## Author: %v\n"+
@@ -73,7 +73,7 @@ func (M *Mod) Header() string {
 	)
 }
 
-func (M *Mod) IsSubmodule() bool {
+func (M Mod) IsSubmodule() bool {
 	return len(strings.Split(M.meta.dir, "/")) > 1
 }
 
@@ -113,20 +113,20 @@ func (M *Mods) Replace(mod Mod) {
 	(*M)[mod.key] = mod
 }
 
-func (M *Mods) Get(key string) Mod {
-	return (*M)[ToKey(key)]
+func (M Mods) Get(key string) Mod {
+	return M[ToKey(key)]
 }
 
-func (M *Mods) Find(key string) (Mod, bool) {
-	mod, exists := (*M)[ToKey(key)]
+func (M Mods) Find(key string) (Mod, bool) {
+	mod, exists := M[ToKey(key)]
 	return mod, exists
 }
 
-func (M *Mods) Strings() string {
+func (M Mods) Strings() string {
 	output := []string{}
 
 	for _, key := range M.keys() {
-		mod := (*M)[key]
+		mod := M[key]
 		output = append(output, fmt.Sprintf("%s:\n%v", mod.key, mod))
 	}
 
@@ -134,18 +134,18 @@ func (M *Mods) Strings() string {
 }
 
 // Prints installed mods (excluding dependencies)
-func (M *Mods) Print() string {
+func (M Mods) Print() string {
 	return M.print(false)
 }
 
 // Prints all mods (including dependencies)
-func (M *Mods) PrintAll() string {
+func (M Mods) PrintAll() string {
 	return M.print(true)
 }
 
-func (M *Mods) keys() []string {
-	keys := make([]string, 0, len(*M))
-	for key := range *M {
+func (M Mods) keys() []string {
+	keys := make([]string, 0, len(M))
+	for key := range M {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
@@ -154,22 +154,22 @@ func (M *Mods) keys() []string {
 }
 
 // Helper function to print mods
-func (M *Mods) print(all bool) string {
+func (M Mods) print(all bool) string {
 	count := 0
 	output := []string{}
 
 	for _, key := range M.keys() {
-		mod := (*M)[key]
+		mod := M[key]
 		if all || !mod.meta.dependency {
 			output = append(output, fmt.Sprintln(mod.Markdown()))
 			count++
 		}
 	}
 
-	return strings.Join(append(output, fmt.Sprintln("Total:", count)), "")
+	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "mods installed")), "")
 }
 
 // Helper Functions
 func ToKey(input string) string {
-	return strings.ToLower(strings.ReplaceAll(input, " ", "-"))
+	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(input), " ", "-"))
 }

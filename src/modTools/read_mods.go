@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -17,7 +16,6 @@ func ReadMods(modList *[]string) (Mods, []error) {
 	var mods = Mods{}
 	var errors []error
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
-	var esoHome = filepath.Join(os.Getenv("ESO_HOME"), "live", "AddOns")
 
 	for _, modfile := range *modList {
 		file, err := AppFs.Open(modfile)
@@ -35,7 +33,7 @@ func ReadMods(modList *[]string) (Mods, []error) {
 		}
 
 		basename := filepath.Base(modfile)
-		relativePath, _ := filepath.Rel(esoHome, modfile)
+		relativePath, _ := filepath.Rel(AddOnsPath, modfile)
 		key := cleanString(strings.ToLower(strings.TrimSuffix(basename, filepath.Ext(basename))))
 
 		mod := NewMod(key)

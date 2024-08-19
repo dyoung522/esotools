@@ -1,23 +1,10 @@
+/*
+Copyright © 2024 NAME HERE <EMAIL ADDRESS>
+*/
 package main
 
-import (
-	"fmt"
-	"os"
-
-	"github.com/dyoung522/esotools/modTools"
-)
+import cmd "github.com/dyoung522/esotools/cmd"
 
 func main() {
-	mods, errs := modTools.GetMods()
-	_ = mods
-
-	if len(errs) > 0 {
-		for _, e := range errs {
-			fmt.Println(e)
-		}
-		os.Exit(1)
-	}
-
-	// fmt.Println(mods.Print())
-	fmt.Println(mods.PrintAll())
+	cmd.Execute()
 }

@@ -1,6 +1,7 @@
 package modTools
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -27,7 +28,7 @@ func (M modMeta) String() string {
 
 type Mod struct {
 	key            string
-	errors         []error
+	errs           []error
 	meta           modMeta
 	Title          string
 	Author         string
@@ -60,7 +61,7 @@ func (M Mod) Header() string {
 			"## SavedVariables: %v\n"+
 			"## DependsOn: %v\n"+
 			"## Meta: %v\n"+
-			"errors: %v\n",
+			"Errors: %v\n",
 		M.Title,
 		M.Author,
 		M.Version,
@@ -69,7 +70,7 @@ func (M Mod) Header() string {
 		strings.Join(M.SavedVariables, " "),
 		strings.Join(M.DependsOn, " "),
 		M.meta,
-		M.errors,
+		M.errs,
 	)
 }
 
@@ -78,18 +79,18 @@ func (M Mod) IsSubmodule() bool {
 }
 
 func (M *Mod) Valid() bool {
-	M.errors = []error{}
+	M.errs = []error{}
 
 	switch {
 	case M.Title == "":
-		M.errors = append(M.errors, fmt.Errorf("Title is missing"))
+		M.errs = append(M.errs, errors.New("'Title' is missing"))
 	case M.Author == "":
-		M.errors = append(M.errors, fmt.Errorf("Author is missing"))
+		M.errs = append(M.errs, errors.New("'Author' is missing"))
 		// case M.Version == "":
-		// 	M.errors = append(M.errors, fmt.Errorf("Version is missing"))
+		// 	M.errs = append(M.errs, fmt.Errorf("'Version' is missing"))
 	}
 
-	return len(M.errors) == 0
+	return len(M.errs) == 0
 }
 
 /**
@@ -97,28 +98,30 @@ func (M *Mod) Valid() bool {
  **/
 type Mods map[string]Mod
 
+// These methods may seem a big draconian, but they're intended to prevent bugs
 func (M *Mods) Add(mod Mod) {
 	if _, exists := (*M)[mod.key]; exists && (*M)[mod.key].key != "" {
-		panic(fmt.Sprintf("Attempt to duplicate an existing Mod: %v\nPerhaps you meant to use Replace()?\n", (*M)[mod.key]))
+		panic(fmt.Errorf("attempt to duplicate an existing Mod: %v\nPerhaps you meant to use Replace()?", (*M)[mod.key]))
 	}
 
 	(*M)[mod.key] = mod
 }
 
+// These methods may seem a big draconian, but they're intended to prevent bugs
 func (M *Mods) Replace(mod Mod) {
 	if _, exists := (*M)[mod.key]; !exists {
-		panic(fmt.Sprintln("Attempt to add a new Mod via Replace\nPerhaps you meant to use Add()?"))
+		panic(fmt.Errorf("attempt to add a new Mod via Replace\nPerhaps you meant to use Add()?"))
 	}
 
 	(*M)[mod.key] = mod
 }
 
-func (M Mods) Get(key string) Mod {
-	return M[ToKey(key)]
+func (M *Mods) Get(key string) Mod {
+	return (*M)[ToKey(key)]
 }
 
-func (M Mods) Find(key string) (Mod, bool) {
-	mod, exists := M[ToKey(key)]
+func (M *Mods) Find(key string) (Mod, bool) {
+	mod, exists := (*M)[ToKey(key)]
 	return mod, exists
 }
 

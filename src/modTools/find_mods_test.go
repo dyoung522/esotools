@@ -1,6 +1,7 @@
 package modTools
 
 import (
+	"fmt"
 	"path/filepath"
 	"testing"
 
@@ -10,7 +11,8 @@ import (
 
 func init() {
 	AppFs = afero.NewMemMapFs()
-	modPath := filepath.Join("/", "tmp", "eso", "live", "AddOns", "TestMod")
+	esoHome := filepath.Join("/tmp", "eso")
+	modPath := filepath.Join(esoHome, "live", "AddOns", "TestMod")
 
 	AppFs.MkdirAll(modPath, 0755)
 	afero.WriteFile(AppFs, filepath.Join(modPath, "TestMod.txt"), []byte("## Title: Test Mod\n"), 0644)
@@ -19,6 +21,7 @@ func init() {
 func TestFindMods(t *testing.T) {
 	t.Run("ENV-SET", func(t *testing.T) {
 		esoHome := filepath.Join("/tmp", "eso")
+		afero.WriteFile(AppFs, ".env", []byte(fmt.Sprintf("ESO_HOME=%q", esoHome)), 0644)
 		t.Setenv("ESO_HOME", esoHome)
 
 		mods, err := FindMods()
@@ -34,6 +37,7 @@ func TestFindMods(t *testing.T) {
 	})
 	t.Run("INVALID-ESO-HOME", func(t *testing.T) {
 		esoHome := filepath.Join("/tmp", "eso", "invalid")
+		afero.WriteFile(AppFs, ".env", []byte(fmt.Sprintf("ESO_HOME=%q", esoHome)), 0644)
 		t.Setenv("ESO_HOME", esoHome)
 
 		_, err := FindMods()

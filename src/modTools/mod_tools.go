@@ -1,6 +1,7 @@
 package modTools
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -20,12 +21,12 @@ func init() {
 	viper.AutomaticEnv()
 	viper.BindEnv("ESO_HOME")
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Printf("Error reading config file, %s", err)
+		fmt.Println(fmt.Errorf("error reading config file, %w", err))
 	}
 
 	ESOHOME = string(viper.GetString("ESO_HOME"))
 	if ESOHOME == "" {
-		fmt.Println(fmt.Errorf("please set the ESO_HOME environment variable and try again"))
+		fmt.Println(errors.New("please set the ESO_HOME environment variable and try again"))
 		os.Exit(1)
 	}
 

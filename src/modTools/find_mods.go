@@ -20,10 +20,10 @@ func FindMods() ([]string, error) {
 
 	err = afero.Walk(AppFs, AddOnsPath, func(path string, info fs.FileInfo, err error) error { return getModList(path, &mods, err) })
 	if err != nil {
-		return mods, err
+		return nil, fmt.Errorf("error occurred while walking %q: %w", AddOnsPath, err)
 	}
 
-	fmt.Println("Found", len(mods), "mods")
+	fmt.Println("Found", len(mods), "mod directories")
 
 	return mods, err
 }

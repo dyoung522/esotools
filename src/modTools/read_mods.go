@@ -14,21 +14,20 @@ import (
 
 func ReadMods(modList *[]string) (Mods, []error) {
 	var mods = Mods{}
-	var errors []error
+	var errs = []error{}
+
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
 
 	for _, modfile := range *modList {
 		file, err := AppFs.Open(modfile)
 		if err != nil {
-			fmt.Println("Error opening file", modfile, err)
-			errors = append(errors, err)
+			errs = append(errs, fmt.Errorf("error opening file: %w", err))
 			continue
 		}
 
 		data, err := afero.ReadAll(file)
 		if err != nil {
-			fmt.Println("Error reading file", modfile, err)
-			errors = append(errors, err)
+			errs = append(errs, fmt.Errorf("error reading file: %w", err))
 			continue
 		}
 
@@ -86,7 +85,7 @@ func ReadMods(modList *[]string) (Mods, []error) {
 				if dup.IsSubmodule() {
 					mods.Replace(mod)
 				} else {
-					errors = append(errors, fmt.Errorf("duplicate mods found for %s\n%v\n%v", mod.key, mod, dup))
+					fmt.Errorf("duplicate mods found for %s\n%v\n%v", mod.key, mod, dup)
 				}
 			}
 
@@ -100,7 +99,7 @@ func ReadMods(modList *[]string) (Mods, []error) {
 
 	markDependencies(&mods)
 
-	return mods, errors
+	return mods, errs
 }
 
 // Cleans up a string by removing any non-graphic characters and extraneous whitespace

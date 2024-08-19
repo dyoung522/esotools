@@ -21,7 +21,7 @@ func init() {
 	viper.AutomaticEnv()
 	viper.BindEnv("ESO_HOME")
 	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(fmt.Errorf("error reading config file, %w", err))
+		fmt.Println(fmt.Errorf("error reading from %q (config file)", viper.ConfigFileUsed()))
 	}
 
 	ESOHOME = string(viper.GetString("ESO_HOME"))

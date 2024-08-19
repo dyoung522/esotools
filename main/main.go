@@ -25,5 +25,6 @@ func main() {
 		os.Exit(1)
 	}
 
+	// fmt.Println(mods.Print())
 	fmt.Println(mods.PrintAll())
 }

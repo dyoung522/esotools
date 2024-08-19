@@ -9,11 +9,12 @@ import (
 	"strings"
 	"unicode"
 
+	"github.com/dyoung522/esotools/esomods"
 	"github.com/spf13/afero"
 )
 
-func ReadMods(modList *[]string) (Mods, []error) {
-	var mods = Mods{}
+func ReadMods(modList *[]string) (esomods.Mods, []error) {
+	var mods = esomods.Mods{}
 	var errs = []error{}
 
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
@@ -35,8 +36,8 @@ func ReadMods(modList *[]string) (Mods, []error) {
 		relativePath, _ := filepath.Rel(AddOnsPath, modfile)
 		key := cleanString(strings.ToLower(strings.TrimSuffix(basename, filepath.Ext(basename))))
 
-		mod := NewMod(key)
-		mod.meta.dir = filepath.Dir(relativePath)
+		mod := esomods.NewMod(key)
+		mod.SetDir(filepath.Dir(relativePath))
 
 		// Create a reader from the byte slice
 		reader := bufio.NewReader(bytes.NewReader(data))
@@ -80,12 +81,12 @@ func ReadMods(modList *[]string) (Mods, []error) {
 		file.Close()
 
 		// Don't add submodules to the list (for now)
-		if dup, exists := mods.Find(mod.key); exists {
+		if dup, exists := mods.Find(mod.ID()); exists {
 			if !mod.IsSubmodule() {
 				if dup.IsSubmodule() {
-					mods.Replace(mod)
+					mods.Update(mod)
 				} else {
-					fmt.Errorf("duplicate mods found for %s\n%v\n%v", mod.key, mod, dup)
+					fmt.Println(fmt.Errorf("duplicate mods found for %s\n%v\n%v", mod.ID(), mod, dup))
 				}
 			}
 
@@ -115,7 +116,7 @@ func dependencyName(input string) string {
 	return strings.Split(input, ">")[0]
 }
 
-func markDependencies(mods *Mods) {
+func markDependencies(mods *esomods.Mods) {
 	for key, mod := range *mods {
 		if len(mod.DependsOn) == 0 {
 			continue
@@ -123,8 +124,8 @@ func markDependencies(mods *Mods) {
 
 		// Mark submodules as dependencies (of their parent)
 		if mod.IsSubmodule() {
-			mod.meta.dependency = true
-			mods.Replace(mod)
+			mod.SetDependency()
+			mods.Update(mod)
 		}
 
 		for _, dependency := range mod.DependsOn {
@@ -136,10 +137,10 @@ func markDependencies(mods *Mods) {
 			}
 
 			if depmod, exists := mods.Find(dependencyName); exists {
-				depmod.meta.dependency = true
-				mods.Replace(depmod)
+				depmod.SetDependency()
+				mods.Update(depmod)
 			} else {
-				fmt.Println("Missing Dependency:", dependencyName)
+				fmt.Println(fmt.Errorf("missing Dependency: %s", dependencyName))
 			}
 		}
 	}

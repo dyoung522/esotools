@@ -4,13 +4,16 @@ import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
+	"strings"
 
+	esoMods "github.com/dyoung522/esotools/esoMods"
+	esoModFiles "github.com/dyoung522/esotools/eso_mod_files"
 	"github.com/spf13/afero"
 )
 
-func FindMods() ([]string, error) {
+func FindMods() ([]esoModFiles.ModDefinition, error) {
 	var err error
-	var mods []string
+	var mods []esoModFiles.ModDefinition
 
 	if ok, err := afero.DirExists(AppFs, AddOnsPath); !ok || err != nil {
 		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", ESOHOME)
@@ -28,16 +31,18 @@ func FindMods() ([]string, error) {
 	return mods, err
 }
 
-func getModList(path string, a *[]string, err error) error {
+func getModList(path string, mods *[]esoModFiles.ModDefinition, err error) error {
 	if err != nil {
 		return err
 	}
 
-	filename := filepath.Base(path)
-	directoryName := filepath.Base(filepath.Dir(path))
+	md := esoModFiles.ModDefinition{
+		Name: filepath.Base(path),
+		Dir:  strings.TrimPrefix(strings.TrimPrefix(filepath.Dir(path), AddOnsPath), "/"),
+	}
 
-	if filepath.Ext(filename) == ".txt" && directoryName+".txt" == filename {
-		*a = append(*a, path)
+	if filepath.Ext(md.Name) == ".txt" && esoMods.ToKey(filepath.Base(md.Dir)) == md.Key() {
+		*mods = append(*mods, md)
 	}
 
 	return nil

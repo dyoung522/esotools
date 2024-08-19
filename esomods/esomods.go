@@ -1,10 +1,14 @@
 package esoMods
 
 import (
-	"errors"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/iancoleman/strcase"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 )
 
 /* Example
@@ -98,20 +102,25 @@ func (M Mod) IsSubmodule() bool {
 	return len(strings.Split(M.meta.dir, "/")) > 1
 }
 
-func (M Mod) ID() string {
+func (M Mod) Key() string {
 	return M.meta.key
 }
 
-func (M *Mod) Valid() bool {
-	M.Errs = []error{}
+func (M *Mod) Valididate() bool {
+	if M.Title == "" {
+		caser := cases.Title(language.English)
+		M.Title = caser.String(strcase.ToDelimited(filepath.Base(M.meta.dir), ' '))
+		if M.Title == "" {
+			M.Errs = append(M.Errs, fmt.Errorf("Title is required"))
+		}
+	}
 
-	switch {
-	case M.Title == "":
-		M.Errs = append(M.Errs, errors.New("'Title' is missing"))
-	case M.Author == "":
-		M.Errs = append(M.Errs, errors.New("'Author' is missing"))
-		// case M.Version == "":
-		// 	M.errs = append(M.errs, fmt.Errorf("'Version' is missing"))
+	if M.Author == "" {
+		M.Author = "Unknown"
+	}
+
+	if M.Version == "" {
+		M.Version = "0"
 	}
 
 	return len(M.Errs) == 0
@@ -160,16 +169,6 @@ func (M Mods) Strings() string {
 	return strings.Join(output, "\n")
 }
 
-// Prints installed mods (excluding dependencies)
-func (M Mods) Print() string {
-	return M.print(false)
-}
-
-// Prints all mods (including dependencies)
-func (M Mods) PrintAll() string {
-	return M.print(true)
-}
-
 func (M Mods) keys() []string {
 	keys := make([]string, 0, len(M))
 	for key := range M {
@@ -180,6 +179,16 @@ func (M Mods) keys() []string {
 	return keys
 }
 
+// Prints installed mods (excluding dependencies)
+func (M Mods) Print() string {
+	return M.print(false)
+}
+
+// Prints all mods (including dependencies)
+func (M Mods) PrintAll() string {
+	return M.print(true)
+}
+
 // Helper function to print mods
 func (M Mods) print(all bool) string {
 	count := 0
@@ -187,6 +196,12 @@ func (M Mods) print(all bool) string {
 
 	for _, key := range M.keys() {
 		mod := M[key]
+
+		// Don't print out submodules
+		if mod.IsSubmodule() {
+			continue
+		}
+
 		if all || !mod.meta.dependency {
 			output = append(output, fmt.Sprintln(mod.Markdown()))
 			count++

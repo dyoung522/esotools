@@ -27,7 +27,7 @@ func GetMods() (esoMods.Mods, []error) {
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
 
 	for _, modfile := range modlist {
-		file, err := AppFs.Open(modfile)
+		file, err := AppFs.Open(filepath.Join(AddOnsPath, modfile.Path()))
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error opening file: %w", err))
 			continue
@@ -40,12 +40,8 @@ func GetMods() (esoMods.Mods, []error) {
 			continue
 		}
 
-		basename := filepath.Base(modfile)
-		relativePath, _ := filepath.Rel(AddOnsPath, modfile)
-		key := cleanString(strings.ToLower(strings.TrimSuffix(basename, filepath.Ext(basename))))
-
-		mod := esoMods.NewMod(key)
-		mod.SetDir(filepath.Dir(relativePath))
+		mod := esoMods.NewMod(modfile.Key())
+		mod.SetDir(modfile.Dir)
 
 		// Create a reader from the byte slice
 		reader := bufio.NewReader(bytes.NewReader(data))
@@ -74,7 +70,7 @@ func GetMods() (esoMods.Mods, []error) {
 				case "Author":
 					mod.Author = rawString
 				case "Version":
-					mod.Version = cleanedString
+					mod.Version = strings.TrimPrefix(cleanedString, "v")
 				case "AddOnVersion":
 					mod.AddOnVersion = cleanedString
 				case "APIVersion":
@@ -88,20 +84,23 @@ func GetMods() (esoMods.Mods, []error) {
 		}
 
 		// Don't add submodules to the list (for now)
-		if dup, exists := mods.Find(mod.ID()); exists {
+		if dup, exists := mods.Find(mod.Key()); exists {
 			if !mod.IsSubmodule() {
 				if dup.IsSubmodule() {
 					mods.Update(mod)
 				} else {
-					fmt.Println(fmt.Errorf("duplicate mods found for %s\n%v\n%v", mod.ID(), mod, dup))
+					fmt.Println(fmt.Errorf("duplicate mods found for %s\n%v\n%v", mod.Key(), mod, dup))
 				}
 			}
 
 			continue
 		}
 
-		if mod.Valid() {
+		if mod.Valididate() {
 			mods.Add(mod)
+		} else {
+			// Ignore mods with errors (for now)
+			// errs = append(errs, fmt.Errorf("invalid mod: %s\n%v", mod.ID(), mod.Errs))
 		}
 	}
 
@@ -139,7 +138,7 @@ func markDependencies(mods *esoMods.Mods) {
 			dependencyName := dependencyName(dependency)
 
 			// Skip self-references
-			if dependencyName == "" || dependencyName == key {
+			if dependencyName == "" || esoMods.ToKey(dependencyName) == key {
 				continue
 			}
 

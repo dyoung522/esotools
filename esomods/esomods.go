@@ -1,4 +1,4 @@
-package esomods
+package esoMods
 
 import (
 	"errors"

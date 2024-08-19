@@ -36,13 +36,6 @@ func getModList(path string, a *[]string, err error) error {
 	filename := filepath.Base(path)
 	directoryName := filepath.Base(filepath.Dir(path))
 
-	// We're filtering this list to only capture mods directly under the base AddOns directory, elimating subdirectories
-	// We may want to include subdirectories in the future, but for now we're only interested in the mods themselves
-	// directoryBase := filepath.Base(filepath.Dir(filepath.Dir(path)))
-	// if directoryBase != "AddOns" {
-	// 	return nil
-	// }
-
 	if filepath.Ext(filename) == ".txt" && directoryName+".txt" == filename {
 		*a = append(*a, path)
 	}

@@ -8,14 +8,7 @@ import (
 )
 
 func main() {
-	modlist, err := modTools.FindMods()
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	mods, errs := modTools.ReadMods(&modlist)
+	mods, errs := modTools.GetMods()
 	_ = mods
 
 	if len(errs) > 0 {

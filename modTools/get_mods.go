@@ -4,27 +4,35 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode"
 
-	"github.com/dyoung522/esotools/esomods"
+	esoMods "github.com/dyoung522/esotools/esoMods"
 	"github.com/spf13/afero"
 )
 
-func ReadMods(modList *[]string) (esomods.Mods, []error) {
-	var mods = esomods.Mods{}
+func GetMods() (esoMods.Mods, []error) {
+	var mods = esoMods.Mods{}
 	var errs = []error{}
+
+	modlist, err := FindMods()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
 
-	for _, modfile := range *modList {
+	for _, modfile := range modlist {
 		file, err := AppFs.Open(modfile)
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error opening file: %w", err))
 			continue
 		}
+		defer file.Close()
 
 		data, err := afero.ReadAll(file)
 		if err != nil {
@@ -36,7 +44,7 @@ func ReadMods(modList *[]string) (esomods.Mods, []error) {
 		relativePath, _ := filepath.Rel(AddOnsPath, modfile)
 		key := cleanString(strings.ToLower(strings.TrimSuffix(basename, filepath.Ext(basename))))
 
-		mod := esomods.NewMod(key)
+		mod := esoMods.NewMod(key)
 		mod.SetDir(filepath.Dir(relativePath))
 
 		// Create a reader from the byte slice
@@ -78,7 +86,6 @@ func ReadMods(modList *[]string) (esomods.Mods, []error) {
 				}
 			}
 		}
-		file.Close()
 
 		// Don't add submodules to the list (for now)
 		if dup, exists := mods.Find(mod.ID()); exists {
@@ -116,7 +123,7 @@ func dependencyName(input string) string {
 	return strings.Split(input, ">")[0]
 }
 
-func markDependencies(mods *esomods.Mods) {
+func markDependencies(mods *esoMods.Mods) {
 	for key, mod := range *mods {
 		if len(mod.DependsOn) == 0 {
 			continue

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	esoMods "github.com/dyoung522/esotools/esoMods"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
@@ -14,21 +15,33 @@ var AppFs afero.Fs
 var ESOHOME string
 var AddOnsPath string
 
-func init() {
-	AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
-
-	viper.SetConfigFile(".env")
-	viper.AutomaticEnv()
-	viper.BindEnv("ESO_HOME")
-	if err := viper.ReadInConfig(); err != nil {
-		fmt.Println(fmt.Errorf("error reading from %q (config file)", viper.ConfigFileUsed()))
-	}
-
-	ESOHOME = string(viper.GetString("ESO_HOME"))
+func Run() (esoMods.Mods, []error) {
+	ESOHOME = string(viper.GetString("eso_home"))
 	if ESOHOME == "" {
 		fmt.Println(errors.New("please set the ESO_HOME environment variable and try again"))
 		os.Exit(1)
 	}
 
 	AddOnsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "AddOns")
+
+	verbose := viper.GetBool("verbose")
+
+	if verbose {
+		fmt.Printf("Getting list of mods\n\n")
+	}
+
+	mods, errs := GetMods()
+
+	if len(errs) > 0 {
+		for _, e := range errs {
+			fmt.Println(e)
+		}
+		os.Exit(1)
+	}
+
+	return mods, errs
+}
+
+func init() {
+	AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
 }

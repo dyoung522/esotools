@@ -51,10 +51,6 @@ func (M Mod) String() string {
 	return M.Header()
 }
 
-func (M Mod) Markdown() string {
-	return fmt.Sprintf("- %s (v%s) by %v", M.Title, M.Version, M.Author)
-}
-
 func (M Mod) Header() string {
 	return fmt.Sprintf(
 		"## Title: %s\n"+
@@ -63,9 +59,7 @@ func (M Mod) Header() string {
 			"## AddOnVersion: %s\n"+
 			"## APIVersion: %v\n"+
 			"## SavedVariables: %v\n"+
-			"## DependsOn: %v\n"+
-			"## Meta: %v\n"+
-			"Errors: %v\n",
+			"## DependsOn: %v\n",
 		M.Title,
 		M.Author,
 		M.Version,
@@ -73,9 +67,15 @@ func (M Mod) Header() string {
 		strings.Join(M.APIVersion, " "),
 		strings.Join(M.SavedVariables, " "),
 		strings.Join(M.DependsOn, " "),
-		M.meta,
-		M.Errs,
 	)
+}
+
+func (M Mod) Simple() string {
+	return fmt.Sprintf("- %s (v%s) by %v", M.Title, M.Version, M.Author)
+}
+
+func (M Mod) Markdown() string {
+	return fmt.Sprintf("## %s (v%s)\nby %s\n", M.Title, M.Version, M.Author)
 }
 
 func (M *Mod) SetDir(dir string) {
@@ -111,7 +111,7 @@ func (M *Mod) Valididate() bool {
 		caser := cases.Title(language.English)
 		M.Title = caser.String(strcase.ToDelimited(filepath.Base(M.meta.dir), ' '))
 		if M.Title == "" {
-			M.Errs = append(M.Errs, fmt.Errorf("Title is required"))
+			M.Errs = append(M.Errs, fmt.Errorf("'Title' is required"))
 		}
 	}
 
@@ -179,18 +179,8 @@ func (M Mods) keys() []string {
 	return keys
 }
 
-// Prints installed mods (excluding dependencies)
-func (M Mods) Print() string {
-	return M.print(false)
-}
-
-// Prints all mods (including dependencies)
-func (M Mods) PrintAll() string {
-	return M.print(true)
-}
-
 // Helper function to print mods
-func (M Mods) print(all bool) string {
+func (M Mods) Print(format string, deps bool) string {
 	count := 0
 	output := []string{}
 
@@ -202,13 +192,22 @@ func (M Mods) print(all bool) string {
 			continue
 		}
 
-		if all || !mod.meta.dependency {
-			output = append(output, fmt.Sprintln(mod.Markdown()))
+		if !mod.meta.dependency || deps {
+			switch format {
+			case "json":
+				// output = append(output, fmt.Sprintln(mod))
+			case "header":
+				output = append(output, fmt.Sprintln(mod.Header()))
+			case "markdown":
+				output = append(output, fmt.Sprintln(mod.Markdown()))
+			default:
+				output = append(output, fmt.Sprintln(mod.Simple()))
+			}
 			count++
 		}
 	}
 
-	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "mods installed")), "")
+	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "mods")), "")
 }
 
 // Helper Functions

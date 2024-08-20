@@ -30,16 +30,7 @@ func Run() (esoMods.Mods, []error) {
 		fmt.Printf("Getting list of mods\n\n")
 	}
 
-	mods, errs := GetMods()
-
-	if len(errs) > 0 {
-		for _, e := range errs {
-			fmt.Println(e)
-		}
-		os.Exit(1)
-	}
-
-	return mods, errs
+	return GetMods()
 }
 
 func init() {

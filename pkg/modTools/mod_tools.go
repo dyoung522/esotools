@@ -17,6 +17,7 @@ var AddOnsPath string
 
 func Run() (esoMods.Mods, []error) {
 	ESOHOME = string(viper.GetString("eso_home"))
+
 	if ESOHOME == "" {
 		fmt.Println(errors.New("please set the ESO_HOME environment variable and try again"))
 		os.Exit(1)
@@ -24,10 +25,8 @@ func Run() (esoMods.Mods, []error) {
 
 	AddOnsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "AddOns")
 
-	verbose := viper.GetBool("verbose")
-
-	if verbose {
-		fmt.Printf("Getting list of mods\n\n")
+	if viper.GetBool("verbose") {
+		fmt.Printf("Searching for mods mods in %q\n\n", AddOnsPath)
 	}
 
 	return GetMods()

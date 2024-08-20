@@ -4,7 +4,6 @@ Copyright © 2024 Donovan C. Young <dyoung522@gmail.com>
 package cmd
 
 import (
-	"fmt"
 	"os"
 
 	sub1 "github.com/dyoung522/esotools/cmd/list"
@@ -18,7 +17,7 @@ var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:     "esotools",
 	Version: "0.1.0",
-	Short:   "toosl used to list, install, and validate ESO mods",
+	Short:   "tools used to list, install, and validate ESO mods",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -75,10 +74,5 @@ func initConfig() {
 	viper.AutomaticEnv() // read in environment variables that match
 
 	// If a config file is found, read it in.
-	if err := viper.ReadInConfig(); err == nil {
-		if viper.GetBool("verbose") {
-			fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
-		}
-	}
-
+	viper.ReadInConfig()
 }

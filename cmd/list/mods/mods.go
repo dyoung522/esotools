@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dyoung522/esotools/modTools"
+	"github.com/dyoung522/esotools/pkg/modTools"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )

@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	esoMods "github.com/dyoung522/esotools/esoMods"
+	"github.com/dyoung522/esotools/pkg/esoMods"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )

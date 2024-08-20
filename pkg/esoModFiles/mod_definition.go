@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dyoung522/esotools/esoMods"
+	"github.com/dyoung522/esotools/pkg/esoMods"
 )
 
 type ModDefinition struct {

@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	sub "github.com/dyoung522/esotools/cmd/list/mods"
+	sub1 "github.com/dyoung522/esotools/cmd/list/mods"
 	"github.com/spf13/cobra"
 )
 
@@ -12,7 +12,7 @@ var ListCmd = &cobra.Command{
 }
 
 func init() {
-	ListCmd.AddCommand(sub.ListModsCmd)
+	ListCmd.AddCommand(sub1.ListModsCmd)
 
 	// Here you will define your flags and configuration settings.
 

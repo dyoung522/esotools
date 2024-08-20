@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	esoMods "github.com/dyoung522/esotools/esoMods"
+	"github.com/dyoung522/esotools/pkg/esoMods"
 	"github.com/spf13/afero"
 )
 

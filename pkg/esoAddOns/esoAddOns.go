@@ -1,6 +1,7 @@
 package esoAddOns
 
 import (
+	"encoding/json"
 	"fmt"
 	"path/filepath"
 	"sort"
@@ -26,10 +27,12 @@ type addonMeta struct {
 	key        string
 	dir        string
 	dependency bool
+	library    bool
+	errs       []error
 }
 
-func (A addonMeta) String() string {
-	return fmt.Sprintf("[dir: %v, dependency: %v]", A.dir, A.dependency)
+func (AM addonMeta) String() string {
+	return fmt.Sprintf("[key: %s, dir: %s, dependency: %v, library: %v]", AM.key, AM.dir, AM.dependency, AM.library)
 }
 
 type AddOn struct {
@@ -39,12 +42,10 @@ type AddOn struct {
 	Version           string
 	Description       string
 	AddOnVersion      string
-	APIVersion        []string
+	APIVersion        string
 	SavedVariables    []string
 	DependsOn         []string
 	OptionalDependsOn []string
-	IsLibrary         bool
-	Errs              []error
 	meta              addonMeta
 }
 
@@ -53,40 +54,77 @@ func NewAddOn(key string) AddOn {
 }
 
 func (A AddOn) String() string {
-	return A.Header()
+	return fmt.Sprintf(
+		"Title: %s, "+
+			"Description: %s, "+
+			"Author: %v, "+
+			"Version: %s, "+
+			"AddOnVersion: %s, "+
+			"APIVersion: %s, "+
+			"SavedVariables: %s, "+
+			"DependsOn: %s, "+
+			"OptionalDependsOn: %s, "+
+			"IsDependency: %v, "+
+			"IsLibrary: %v",
+		A.Title,
+		A.Description,
+		A.Author,
+		A.Version,
+		A.AddOnVersion,
+		A.APIVersion,
+		strings.Join(A.SavedVariables, " "),
+		strings.Join(A.DependsOn, " "),
+		strings.Join(A.OptionalDependsOn, " "),
+		A.meta.dependency,
+		A.meta.library,
+	)
 }
 
 func (A AddOn) Header() string {
 	return fmt.Sprintf(
 		"## Title: %s\n"+
 			"## Description: %s\n"+
-			"## Author: %v\n"+
+			"## Author: %s\n"+
 			"## Version: %s\n"+
 			"## AddOnVersion: %s\n"+
-			"## APIVersion: %v\n"+
-			"## SavedVariables: %v\n"+
-			"## DependsOn: %v\n"+
-			"## OptionalDependsOn: %v\n"+
+			"## APIVersion: %s\n"+
+			"## SavedVariables: %s\n"+
+			"## DependsOn: %s\n"+
+			"## OptionalDependsOn: %s\n"+
+			"## IsDependency: %v\n"+
 			"## IsLibrary: %v\n",
 		A.Title,
 		A.Description,
 		A.Author,
 		A.Version,
 		A.AddOnVersion,
-		strings.Join(A.APIVersion, " "),
+		A.APIVersion,
 		strings.Join(A.SavedVariables, " "),
 		strings.Join(A.DependsOn, " "),
 		strings.Join(A.OptionalDependsOn, " "),
-		A.IsLibrary,
+		A.meta.dependency,
+		A.meta.library,
 	)
 }
 
+func (A AddOn) TitleString() string {
+	return fmt.Sprintf("%s (v%s) by %v", A.Title, A.Version, A.Author)
+}
+
 func (A AddOn) Simple() string {
-	return fmt.Sprintf("- %s (v%s) by %v", A.Title, A.Version, A.Author)
+	return fmt.Sprintf("- %s", A.TitleString())
 }
 
 func (A AddOn) Markdown() string {
-	return fmt.Sprintf("## %s (v%s)\nby %s\n", A.Title, A.Version, A.Author)
+	return fmt.Sprintf("## %s\n\n%s\n", A.TitleString(), A.Description)
+}
+
+func (A AddOn) JSON() ([]byte, error) {
+	output, err := json.Marshal(A)
+	if err != nil {
+		return []byte{}, fmt.Errorf("error marshalling JSON: %w", err)
+	}
+	return output, nil
 }
 
 func (A *AddOn) SetDir(dir string) {
@@ -97,20 +135,32 @@ func (A *AddOn) GetDir() string {
 	return A.meta.dir
 }
 
-func (A *AddOn) SetDependency() {
-	A.meta.dependency = true
-}
-
-func (A *AddOn) ClearDependency() {
-	A.meta.dependency = false
+func (A *AddOn) SetDependency(value bool) {
+	A.meta.dependency = value
 }
 
 func (A *AddOn) IsDependency() bool {
 	return A.meta.dependency
 }
 
+func (A *AddOn) SetLibrary(value bool) {
+	A.meta.library = value
+}
+
+func (A AddOn) IsLibrary() bool {
+	return A.meta.library
+}
+
 func (A AddOn) IsSubmodule() bool {
 	return len(strings.Split(A.meta.dir, "/")) > 1
+}
+
+func (A *AddOn) AddError(err error) {
+	A.meta.errs = append(A.meta.errs, err)
+}
+
+func (A AddOn) Errors() []error {
+	return A.meta.errs
 }
 
 func (A AddOn) Key() string {
@@ -122,7 +172,7 @@ func (A *AddOn) Valididate() bool {
 		caser := cases.Title(language.English)
 		A.Title = caser.String(strcase.ToDelimited(filepath.Base(A.meta.dir), ' '))
 		if A.Title == "" {
-			A.Errs = append(A.Errs, fmt.Errorf("'Title' is required"))
+			A.AddError(fmt.Errorf("'Title' is required"))
 		}
 	}
 
@@ -134,7 +184,7 @@ func (A *AddOn) Valididate() bool {
 		A.Version = "0"
 	}
 
-	return len(A.Errs) == 0
+	return len(A.Errors()) == 0
 }
 
 /**
@@ -197,14 +247,8 @@ func (A AddOns) Print(format string) string {
 		libs   bool = !viper.GetBool("noLibs")
 		count       = 0
 		output      = []string{}
+		addons      = []AddOn{}
 	)
-
-	if viper.GetInt("verbosity") >= 2 {
-		fmt.Println("Print Dependencies?", deps)
-		fmt.Println("Print Libraries?", libs)
-	}
-
-	_ = libs // TODO: Implement this
 
 	for _, key := range A.keys() {
 		addon := A[key]
@@ -214,10 +258,10 @@ func (A AddOns) Print(format string) string {
 			continue
 		}
 
-		if (!addon.meta.dependency || deps) && (!addon.IsLibrary || libs) {
+		if (!addon.meta.dependency || deps) && (!addon.meta.library || libs) {
 			switch format {
 			case "json":
-				// output = append(output, fmt.Sprintln(addon))
+				addons = append(addons, addon)
 			case "header":
 				output = append(output, fmt.Sprintln(addon.Header()))
 			case "markdown":
@@ -227,6 +271,11 @@ func (A AddOns) Print(format string) string {
 			}
 			count++
 		}
+	}
+
+	if format == "json" {
+		jout, _ := json.Marshal(addons)
+		return string(jout)
 	}
 
 	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "AddOns")), "")

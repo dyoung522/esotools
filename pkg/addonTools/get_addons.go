@@ -79,7 +79,7 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 				case "AddOnVersion", "AddonVersion":
 					addon.AddOnVersion = cleanedString
 				case "APIVersion":
-					addon.APIVersion = strings.Split(cleanedString, " ")
+					addon.APIVersion = cleanedString
 				case "SavedVariables":
 					addon.SavedVariables = strings.Split(cleanedString, " ")
 				case "DependsOn":
@@ -87,7 +87,7 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 				case "OptionalDependsOn":
 					addon.OptionalDependsOn = strings.Split(cleanedString, " ")
 				case "IsLibrary":
-					addon.IsLibrary = cleanedString == "true"
+					addon.SetLibrary(cleanedString == "true")
 				default:
 					if viper.GetInt("verbosity") >= 3 {
 						fmt.Println(fmt.Errorf("unknown type: %s with value: %s", matches[typeIndex], matches[dataIndex]))
@@ -113,7 +113,7 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 			addons.Add(addon)
 		} else {
 			// Ignore addons with errors (for now)
-			// errs = append(errs, fmt.Errorf("invalid addon: %s\n%v", addon.ID(), addon.Errs))
+			// errs = append(errs, fmt.Errorf("invalid addon: %s\n%v", addon.ID(), addon.Errors()))
 		}
 	}
 
@@ -143,7 +143,7 @@ func markDependencies(addons *esoAddOns.AddOns) {
 
 		// Mark submodules as dependencies (of their parent)
 		if addon.IsSubmodule() {
-			addon.SetDependency()
+			addon.SetDependency(true)
 			addons.Update(addon)
 		}
 
@@ -156,7 +156,7 @@ func markDependencies(addons *esoAddOns.AddOns) {
 			}
 
 			if depaddon, exists := addons.Find(dependencyName); exists {
-				depaddon.SetDependency()
+				depaddon.SetDependency(true)
 				addons.Update(depaddon)
 			} else {
 				fmt.Println(fmt.Errorf("missing Dependency: %s", dependencyName))

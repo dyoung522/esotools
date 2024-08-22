@@ -39,7 +39,7 @@ By default, this will print out a simple list with only one AddOn per line. Howe
 
 		switch {
 		case ofJSON:
-			fmt.Println("using JSON format")
+			fmt.Println(addons.Print("json"))
 		case ofMarkdown:
 			fmt.Println(addons.Print("markdown"))
 		case ofRaw:

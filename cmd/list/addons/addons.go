@@ -10,11 +10,12 @@ import (
 )
 
 var (
-	ofSimple     bool = true
-	ofMarkdown   bool
-	ofJSON       bool
-	ofRaw        bool
-	noDependency bool
+	ofSimple   bool = true
+	ofMarkdown bool
+	ofJSON     bool
+	ofRaw      bool
+	noDeps     bool
+	noLibs     bool
 )
 
 // ListAddOnsCmd represents the addons command
@@ -40,11 +41,11 @@ By default, this will print out a simple list with only one AddOn per line. Howe
 		case ofJSON:
 			fmt.Println("using JSON format")
 		case ofMarkdown:
-			fmt.Println(addons.Print("markdown", !noDependency))
+			fmt.Println(addons.Print("markdown"))
 		case ofRaw:
-			fmt.Println(addons.Print("header", !noDependency))
+			fmt.Println(addons.Print("header"))
 		default:
-			fmt.Println(addons.Print("simple", !noDependency))
+			fmt.Println(addons.Print("simple"))
 		}
 	},
 }
@@ -56,6 +57,9 @@ func init() {
 	ListAddOnsCmd.Flags().BoolVarP(&ofSimple, "simple", "s", false, "Prints the AddOn listing in simple plain text")
 	ListAddOnsCmd.MarkFlagsMutuallyExclusive("json", "markdown", "raw", "simple")
 
-	ListAddOnsCmd.Flags().BoolVarP(&noDependency, "no-deps", "D", false, "Suppresses printing of AddOns that are dependencies of other AddOns")
-	viper.BindPFlag("no-deps", ListAddOnsCmd.Flags().Lookup("no-deps"))
+	ListAddOnsCmd.Flags().BoolVarP(&noLibs, "no-libs", "L", false, "Suppresses printing of AddOns that are considered Libraries")
+	viper.BindPFlag("noLibs", ListAddOnsCmd.Flags().Lookup("no-libs"))
+
+	ListAddOnsCmd.Flags().BoolVarP(&noDeps, "no-deps", "D", false, "Suppresses printing of AddOns that are dependencies of other AddOns")
+	viper.BindPFlag("noDeps", ListAddOnsCmd.Flags().Lookup("no-deps"))
 }

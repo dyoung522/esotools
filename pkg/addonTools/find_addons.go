@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 )
 
-var verbose = viper.GetBool("verbose")
+var verbosity = viper.GetInt("verbosity")
 
 func FindAddOns() ([]esoAddOnFiles.AddOnDefinition, error) {
 	var err error
@@ -22,7 +22,7 @@ func FindAddOns() ([]esoAddOnFiles.AddOnDefinition, error) {
 		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", ESOHOME)
 	}
 
-	if verbose {
+	if verbosity >= 1 {
 		fmt.Println("Searching", AddOnsPath)
 	}
 
@@ -31,7 +31,7 @@ func FindAddOns() ([]esoAddOnFiles.AddOnDefinition, error) {
 		return nil, fmt.Errorf("error occurred while walking %q: %w", AddOnsPath, err)
 	}
 
-	if verbose {
+	if verbosity >= 1 {
 		fmt.Println("Found", len(addons), "AddOn directories")
 	}
 

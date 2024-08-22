@@ -12,6 +12,7 @@ import (
 
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
 	"github.com/spf13/afero"
+	"github.com/spf13/viper"
 )
 
 func GetAddOns() (esoAddOns.AddOns, []error) {
@@ -67,11 +68,15 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 				switch matches[typeIndex] {
 				case "Title":
 					addon.Title = cleanedString
+				case "Description":
+					addon.Description = rawString
 				case "Author":
 					addon.Author = rawString
+				case "Contributors":
+					addon.Contributors = rawString
 				case "Version":
 					addon.Version = strings.TrimPrefix(cleanedString, "v")
-				case "AddOnVersion":
+				case "AddOnVersion", "AddonVersion":
 					addon.AddOnVersion = cleanedString
 				case "APIVersion":
 					addon.APIVersion = strings.Split(cleanedString, " ")
@@ -79,6 +84,14 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 					addon.SavedVariables = strings.Split(cleanedString, " ")
 				case "DependsOn":
 					addon.DependsOn = strings.Split(cleanedString, " ")
+				case "OptionalDependsOn":
+					addon.OptionalDependsOn = strings.Split(cleanedString, " ")
+				case "IsLibrary":
+					addon.IsLibrary = cleanedString == "true"
+				default:
+					if viper.GetInt("verbosity") >= 3 {
+						fmt.Println(fmt.Errorf("unknown type: %s with value: %s", matches[typeIndex], matches[dataIndex]))
+					}
 				}
 			}
 		}

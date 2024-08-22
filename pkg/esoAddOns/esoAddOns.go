@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/iancoleman/strcase"
+	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
 )
@@ -27,103 +28,113 @@ type addonMeta struct {
 	dependency bool
 }
 
-func (M addonMeta) String() string {
-	return fmt.Sprintf("[dir: %v, dependency: %v]", M.dir, M.dependency)
+func (A addonMeta) String() string {
+	return fmt.Sprintf("[dir: %v, dependency: %v]", A.dir, A.dependency)
 }
 
 type AddOn struct {
-	Title          string
-	Author         string
-	Version        string
-	AddOnVersion   string
-	APIVersion     []string
-	SavedVariables []string
-	DependsOn      []string
-	Errs           []error
-	meta           addonMeta
+	Title             string
+	Author            string
+	Contributors      string
+	Version           string
+	Description       string
+	AddOnVersion      string
+	APIVersion        []string
+	SavedVariables    []string
+	DependsOn         []string
+	OptionalDependsOn []string
+	IsLibrary         bool
+	Errs              []error
+	meta              addonMeta
 }
 
 func NewAddOn(key string) AddOn {
 	return AddOn{meta: addonMeta{key: ToKey(key)}}
 }
 
-func (M AddOn) String() string {
-	return M.Header()
+func (A AddOn) String() string {
+	return A.Header()
 }
 
-func (M AddOn) Header() string {
+func (A AddOn) Header() string {
 	return fmt.Sprintf(
 		"## Title: %s\n"+
+			"## Description: %s\n"+
 			"## Author: %v\n"+
 			"## Version: %s\n"+
 			"## AddOnVersion: %s\n"+
 			"## APIVersion: %v\n"+
 			"## SavedVariables: %v\n"+
-			"## DependsOn: %v\n",
-		M.Title,
-		M.Author,
-		M.Version,
-		M.AddOnVersion,
-		strings.Join(M.APIVersion, " "),
-		strings.Join(M.SavedVariables, " "),
-		strings.Join(M.DependsOn, " "),
+			"## DependsOn: %v\n"+
+			"## OptionalDependsOn: %v\n"+
+			"## IsLibrary: %v\n",
+		A.Title,
+		A.Description,
+		A.Author,
+		A.Version,
+		A.AddOnVersion,
+		strings.Join(A.APIVersion, " "),
+		strings.Join(A.SavedVariables, " "),
+		strings.Join(A.DependsOn, " "),
+		strings.Join(A.OptionalDependsOn, " "),
+		A.IsLibrary,
 	)
 }
 
-func (M AddOn) Simple() string {
-	return fmt.Sprintf("- %s (v%s) by %v", M.Title, M.Version, M.Author)
+func (A AddOn) Simple() string {
+	return fmt.Sprintf("- %s (v%s) by %v", A.Title, A.Version, A.Author)
 }
 
-func (M AddOn) Markdown() string {
-	return fmt.Sprintf("## %s (v%s)\nby %s\n", M.Title, M.Version, M.Author)
+func (A AddOn) Markdown() string {
+	return fmt.Sprintf("## %s (v%s)\nby %s\n", A.Title, A.Version, A.Author)
 }
 
-func (M *AddOn) SetDir(dir string) {
-	M.meta.dir = dir
+func (A *AddOn) SetDir(dir string) {
+	A.meta.dir = dir
 }
 
-func (M *AddOn) GetDir() string {
-	return M.meta.dir
+func (A *AddOn) GetDir() string {
+	return A.meta.dir
 }
 
-func (M *AddOn) SetDependency() {
-	M.meta.dependency = true
+func (A *AddOn) SetDependency() {
+	A.meta.dependency = true
 }
 
-func (M *AddOn) ClearDependency() {
-	M.meta.dependency = false
+func (A *AddOn) ClearDependency() {
+	A.meta.dependency = false
 }
 
-func (M *AddOn) IsDependency() bool {
-	return M.meta.dependency
+func (A *AddOn) IsDependency() bool {
+	return A.meta.dependency
 }
 
-func (M AddOn) IsSubmodule() bool {
-	return len(strings.Split(M.meta.dir, "/")) > 1
+func (A AddOn) IsSubmodule() bool {
+	return len(strings.Split(A.meta.dir, "/")) > 1
 }
 
-func (M AddOn) Key() string {
-	return M.meta.key
+func (A AddOn) Key() string {
+	return A.meta.key
 }
 
-func (M *AddOn) Valididate() bool {
-	if M.Title == "" {
+func (A *AddOn) Valididate() bool {
+	if A.Title == "" {
 		caser := cases.Title(language.English)
-		M.Title = caser.String(strcase.ToDelimited(filepath.Base(M.meta.dir), ' '))
-		if M.Title == "" {
-			M.Errs = append(M.Errs, fmt.Errorf("'Title' is required"))
+		A.Title = caser.String(strcase.ToDelimited(filepath.Base(A.meta.dir), ' '))
+		if A.Title == "" {
+			A.Errs = append(A.Errs, fmt.Errorf("'Title' is required"))
 		}
 	}
 
-	if M.Author == "" {
-		M.Author = "Unknown"
+	if A.Author == "" {
+		A.Author = "Unknown"
 	}
 
-	if M.Version == "" {
-		M.Version = "0"
+	if A.Version == "" {
+		A.Version = "0"
 	}
 
-	return len(M.Errs) == 0
+	return len(A.Errs) == 0
 }
 
 /**
@@ -180,9 +191,20 @@ func (A AddOns) keys() []string {
 }
 
 // Helper function to print addons
-func (A AddOns) Print(format string, deps bool) string {
-	count := 0
-	output := []string{}
+func (A AddOns) Print(format string) string {
+	var (
+		deps   bool = !viper.GetBool("noDeps")
+		libs   bool = !viper.GetBool("noLibs")
+		count       = 0
+		output      = []string{}
+	)
+
+	if viper.GetInt("verbosity") >= 2 {
+		fmt.Println("Print Dependencies?", deps)
+		fmt.Println("Print Libraries?", libs)
+	}
+
+	_ = libs // TODO: Implement this
 
 	for _, key := range A.keys() {
 		addon := A[key]
@@ -192,7 +214,7 @@ func (A AddOns) Print(format string, deps bool) string {
 			continue
 		}
 
-		if !addon.meta.dependency || deps {
+		if (!addon.meta.dependency || deps) && (!addon.IsLibrary || libs) {
 			switch format {
 			case "json":
 				// output = append(output, fmt.Sprintln(addon))

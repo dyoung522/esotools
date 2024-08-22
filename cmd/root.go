@@ -18,6 +18,10 @@ var RootCmd = &cobra.Command{
 	Use:     "esotools",
 	Version: "0.1.0",
 	Short:   "tools used to list, install, and validate ESO AddOns",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		verbosity, _ := cmd.Flags().GetCount("verbose")
+		viper.Set("verbosity", verbosity)
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -31,25 +35,15 @@ func Execute() {
 }
 
 func init() {
-	var Verbose bool
+	// var Verbose int
 
 	cobra.OnInitialize(initConfig)
 
-	// Here you will define your flags and configuration settings.
-	// Cobra supports persistent flags, which, if defined here,
-	// will be global for your application.
-
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.esotools.yaml)")
-
 	RootCmd.PersistentFlags().StringP("esohome", "H", "", "The full installation path of your ESO game files (where the `live` folder lives).")
+	RootCmd.PersistentFlags().CountP("verbose", "v", "counted verbosity")
+
 	viper.BindPFlag("eso_home", RootCmd.PersistentFlags().Lookup("esohome"))
-
-	RootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
-	viper.BindPFlag("verbose", RootCmd.PersistentFlags().Lookup("verbose"))
-
-	// Cobra also supports local flags, which will only run
-	// when this action is called directly.
-	// RootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 
 	// Add subcommands
 	RootCmd.AddCommand(sub1.ListCmd)

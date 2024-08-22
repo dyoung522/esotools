@@ -25,7 +25,7 @@ func Run() (esoAddOns.AddOns, []error) {
 
 	AddOnsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "AddOns")
 
-	if viper.GetBool("verbose") {
+	if viper.GetInt("verbosity") >= 1 {
 		fmt.Printf("Searching for AddOns in %q\n\n", AddOnsPath)
 	}
 

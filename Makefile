@@ -17,3 +17,6 @@ build-osx:
 
 build-win:
 	GOOS=windows GOARCH=amd64 go build -o "bin/$(shell basename $(PWD)).exe" ./main.go
+
+test:
+	ginkgo -r

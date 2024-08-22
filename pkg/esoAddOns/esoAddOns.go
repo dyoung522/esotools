@@ -3,7 +3,6 @@ package esoAddOns
 import (
 	"encoding/json"
 	"fmt"
-	"path/filepath"
 	"sort"
 	"strings"
 
@@ -49,8 +48,14 @@ type AddOn struct {
 	meta              addonMeta
 }
 
-func NewAddOn(key string) AddOn {
-	return AddOn{meta: addonMeta{key: ToKey(key)}}
+func NewAddOn(key string) (AddOn, error) {
+	id := ToKey(key)
+
+	if key == "" || id == "" {
+		return AddOn{}, fmt.Errorf("key is required")
+	}
+
+	return AddOn{meta: addonMeta{key: ToKey(key)}}, nil
 }
 
 func (A AddOn) String() string {
@@ -80,7 +85,11 @@ func (A AddOn) String() string {
 	)
 }
 
-func (A AddOn) Header() string {
+func (A AddOn) ToOnelineMarkdown() string {
+	return fmt.Sprintf("- %s", A.TitleString())
+}
+
+func (A AddOn) ToHeader() string {
 	return fmt.Sprintf(
 		"## Title: %s\n"+
 			"## Description: %s\n"+
@@ -107,19 +116,11 @@ func (A AddOn) Header() string {
 	)
 }
 
-func (A AddOn) TitleString() string {
-	return fmt.Sprintf("%s (v%s) by %v", A.Title, A.Version, A.Author)
-}
-
-func (A AddOn) Simple() string {
-	return fmt.Sprintf("- %s", A.TitleString())
-}
-
-func (A AddOn) Markdown() string {
+func (A AddOn) ToMarkdown() string {
 	return fmt.Sprintf("## %s\n\n%s\n", A.TitleString(), A.Description)
 }
 
-func (A AddOn) JSON() ([]byte, error) {
+func (A AddOn) ToJson() ([]byte, error) {
 	output, err := json.Marshal(A)
 	if err != nil {
 		return []byte{}, fmt.Errorf("error marshalling JSON: %w", err)
@@ -127,11 +128,15 @@ func (A AddOn) JSON() ([]byte, error) {
 	return output, nil
 }
 
+func (A AddOn) TitleString() string {
+	return fmt.Sprintf("%s (v%s) by %v", A.Title, A.Version, A.Author)
+}
+
 func (A *AddOn) SetDir(dir string) {
 	A.meta.dir = dir
 }
 
-func (A *AddOn) GetDir() string {
+func (A *AddOn) Dir() string {
 	return A.meta.dir
 }
 
@@ -167,10 +172,10 @@ func (A AddOn) Key() string {
 	return A.meta.key
 }
 
-func (A *AddOn) Valididate() bool {
+func (A *AddOn) Validate() bool {
 	if A.Title == "" {
 		caser := cases.Title(language.English)
-		A.Title = caser.String(strcase.ToDelimited(filepath.Base(A.meta.dir), ' '))
+		A.Title = caser.String(strcase.ToDelimited(A.meta.key, ' '))
 		if A.Title == "" {
 			A.AddError(fmt.Errorf("'Title' is required"))
 		}
@@ -263,11 +268,11 @@ func (A AddOns) Print(format string) string {
 			case "json":
 				addons = append(addons, addon)
 			case "header":
-				output = append(output, fmt.Sprintln(addon.Header()))
+				output = append(output, fmt.Sprintln(addon.ToHeader()))
 			case "markdown":
-				output = append(output, fmt.Sprintln(addon.Markdown()))
+				output = append(output, fmt.Sprintln(addon.ToMarkdown()))
 			default:
-				output = append(output, fmt.Sprintln(addon.Simple()))
+				output = append(output, fmt.Sprintln(addon.ToOnelineMarkdown()))
 			}
 			count++
 		}
@@ -283,5 +288,6 @@ func (A AddOns) Print(format string) string {
 
 // Helper Functions
 func ToKey(input string) string {
-	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(input), " ", "-"))
+	// return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(input), " ", "_"))
+	return strings.ReplaceAll(strings.TrimSpace(input), " ", "")
 }

@@ -14,7 +14,7 @@ import (
 
 var verbosity = viper.GetInt("verbosity")
 
-func FindAddOns() ([]esoAddOnFiles.AddOnDefinition, error) {
+func FindAddOns(AppFs afero.Fs) ([]esoAddOnFiles.AddOnDefinition, error) {
 	var err error
 	var addons []esoAddOnFiles.AddOnDefinition
 

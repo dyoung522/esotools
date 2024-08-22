@@ -11,11 +11,12 @@ import (
 	"github.com/spf13/viper"
 )
 
-var AppFs afero.Fs
 var ESOHOME string
 var AddOnsPath string
 
 func Run() (esoAddOns.AddOns, []error) {
+	var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
+
 	ESOHOME = string(viper.GetString("eso_home"))
 
 	if ESOHOME == "" {
@@ -29,9 +30,5 @@ func Run() (esoAddOns.AddOns, []error) {
 		fmt.Printf("Searching for AddOns in %q\n\n", AddOnsPath)
 	}
 
-	return GetAddOns()
-}
-
-func init() {
-	AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
+	return GetAddOns(AppFs)
 }

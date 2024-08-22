@@ -15,11 +15,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-func GetAddOns() (esoAddOns.AddOns, []error) {
+func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 	var addons = esoAddOns.AddOns{}
 	var errs = []error{}
 
-	addonlist, err := FindAddOns()
+	addonlist, err := FindAddOns(AppFs)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -41,7 +41,12 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 			continue
 		}
 
-		addon := esoAddOns.NewAddOn(addonFile.Key())
+		addon, err := esoAddOns.NewAddOn(addonFile.Key())
+		if err != nil {
+			errs = append(errs, fmt.Errorf("could not create addon: %w", err))
+			continue
+		}
+
 		addon.SetDir(addonFile.Dir)
 
 		// Create a reader from the byte slice
@@ -109,7 +114,7 @@ func GetAddOns() (esoAddOns.AddOns, []error) {
 			continue
 		}
 
-		if addon.Valididate() {
+		if addon.Validate() {
 			addons.Add(addon)
 		} else {
 			// Ignore addons with errors (for now)

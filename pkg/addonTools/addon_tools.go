@@ -1,4 +1,4 @@
-package modTools
+package addonTools
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/dyoung522/esotools/pkg/esoMods"
+	"github.com/dyoung522/esotools/pkg/esoAddOns"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
@@ -15,7 +15,7 @@ var AppFs afero.Fs
 var ESOHOME string
 var AddOnsPath string
 
-func Run() (esoMods.Mods, []error) {
+func Run() (esoAddOns.AddOns, []error) {
 	ESOHOME = string(viper.GetString("eso_home"))
 
 	if ESOHOME == "" {
@@ -26,10 +26,10 @@ func Run() (esoMods.Mods, []error) {
 	AddOnsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "AddOns")
 
 	if viper.GetBool("verbose") {
-		fmt.Printf("Searching for mods mods in %q\n\n", AddOnsPath)
+		fmt.Printf("Searching for AddOns in %q\n\n", AddOnsPath)
 	}
 
-	return GetMods()
+	return GetAddOns()
 }
 
 func init() {

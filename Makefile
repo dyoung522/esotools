@@ -7,10 +7,13 @@ fmt: tidy
 vet: fmt
 	go vet ./...
 
-build: vet build-osx build-linux build-win
+clean_bin:
+	rm -f bin/*
+
+build: vet clean_bin build-osx build-win
 
 build-osx:
-	GOOS=darwin GOARCH=amd64 go build -o "bin/$(shell basename $(PWD))-darwin-amd64" ./main.go
+	GOOS=darwin GOARCH=amd64 go build -o "bin/$(shell basename $(PWD))" ./main.go
 
 build-win:
 	GOOS=windows GOARCH=amd64 go build -o "bin/$(shell basename $(PWD)).exe" ./main.go

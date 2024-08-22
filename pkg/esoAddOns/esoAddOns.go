@@ -1,4 +1,4 @@
-package esoMods
+package esoAddOns
 
 import (
 	"fmt"
@@ -21,17 +21,17 @@ import (
 ## DependsOn: LibSort LibAddonMenu-2.0>=3
 */
 
-type modMeta struct {
+type addonMeta struct {
 	key        string
 	dir        string
 	dependency bool
 }
 
-func (M modMeta) String() string {
+func (M addonMeta) String() string {
 	return fmt.Sprintf("[dir: %v, dependency: %v]", M.dir, M.dependency)
 }
 
-type Mod struct {
+type AddOn struct {
 	Title          string
 	Author         string
 	Version        string
@@ -40,18 +40,18 @@ type Mod struct {
 	SavedVariables []string
 	DependsOn      []string
 	Errs           []error
-	meta           modMeta
+	meta           addonMeta
 }
 
-func NewMod(key string) Mod {
-	return Mod{meta: modMeta{key: ToKey(key)}}
+func NewAddOn(key string) AddOn {
+	return AddOn{meta: addonMeta{key: ToKey(key)}}
 }
 
-func (M Mod) String() string {
+func (M AddOn) String() string {
 	return M.Header()
 }
 
-func (M Mod) Header() string {
+func (M AddOn) Header() string {
 	return fmt.Sprintf(
 		"## Title: %s\n"+
 			"## Author: %v\n"+
@@ -70,43 +70,43 @@ func (M Mod) Header() string {
 	)
 }
 
-func (M Mod) Simple() string {
+func (M AddOn) Simple() string {
 	return fmt.Sprintf("- %s (v%s) by %v", M.Title, M.Version, M.Author)
 }
 
-func (M Mod) Markdown() string {
+func (M AddOn) Markdown() string {
 	return fmt.Sprintf("## %s (v%s)\nby %s\n", M.Title, M.Version, M.Author)
 }
 
-func (M *Mod) SetDir(dir string) {
+func (M *AddOn) SetDir(dir string) {
 	M.meta.dir = dir
 }
 
-func (M *Mod) GetDir() string {
+func (M *AddOn) GetDir() string {
 	return M.meta.dir
 }
 
-func (M *Mod) SetDependency() {
+func (M *AddOn) SetDependency() {
 	M.meta.dependency = true
 }
 
-func (M *Mod) ClearDependency() {
+func (M *AddOn) ClearDependency() {
 	M.meta.dependency = false
 }
 
-func (M *Mod) IsDependency() bool {
+func (M *AddOn) IsDependency() bool {
 	return M.meta.dependency
 }
 
-func (M Mod) IsSubmodule() bool {
+func (M AddOn) IsSubmodule() bool {
 	return len(strings.Split(M.meta.dir, "/")) > 1
 }
 
-func (M Mod) Key() string {
+func (M AddOn) Key() string {
 	return M.meta.key
 }
 
-func (M *Mod) Valididate() bool {
+func (M *AddOn) Valididate() bool {
 	if M.Title == "" {
 		caser := cases.Title(language.English)
 		M.Title = caser.String(strcase.ToDelimited(filepath.Base(M.meta.dir), ' '))
@@ -127,51 +127,51 @@ func (M *Mod) Valididate() bool {
 }
 
 /**
- ** Global Mods Container
+ ** Global AddOn Container
  **/
-type Mods map[string]Mod
+type AddOns map[string]AddOn
 
 // These methods may seem a big draconian, but they're intended to prevent bugs
-func (M *Mods) Add(mod Mod) {
-	if _, exists := (*M)[mod.meta.key]; exists && (*M)[mod.meta.key].meta.key != "" {
-		panic(fmt.Errorf("attempt to duplicate an existing Mod: %v\nPerhaps you meant to use Update()?", (*M)[mod.meta.key]))
+func (A *AddOns) Add(addon AddOn) {
+	if _, exists := (*A)[addon.meta.key]; exists && (*A)[addon.meta.key].meta.key != "" {
+		panic(fmt.Errorf("attempt to duplicate an existing AddOn: %v\nPerhaps you meant to use Update()?", (*A)[addon.meta.key]))
 	}
 
-	(*M)[mod.meta.key] = mod
+	(*A)[addon.meta.key] = addon
 }
 
 // These methods may seem a big draconian, but they're intended to prevent bugs
-func (M *Mods) Update(mod Mod) {
-	if _, exists := (*M)[mod.meta.key]; !exists {
-		panic(fmt.Errorf("attempt to add a new Mod via Update\nPerhaps you meant to use Add()?"))
+func (A *AddOns) Update(addon AddOn) {
+	if _, exists := (*A)[addon.meta.key]; !exists {
+		panic(fmt.Errorf("attempt to add a new AddOn via Update\nPerhaps you meant to use Add()?"))
 	}
 
-	(*M)[mod.meta.key] = mod
+	(*A)[addon.meta.key] = addon
 }
 
-func (M *Mods) Get(key string) Mod {
-	return (*M)[ToKey(key)]
+func (A *AddOns) Get(key string) AddOn {
+	return (*A)[ToKey(key)]
 }
 
-func (M *Mods) Find(key string) (Mod, bool) {
-	mod, exists := (*M)[ToKey(key)]
-	return mod, exists
+func (A *AddOns) Find(key string) (AddOn, bool) {
+	addon, exists := (*A)[ToKey(key)]
+	return addon, exists
 }
 
-func (M Mods) Strings() string {
+func (A AddOns) Strings() string {
 	output := []string{}
 
-	for _, key := range M.keys() {
-		mod := M[key]
-		output = append(output, fmt.Sprintf("%s:\n%v", mod.meta.key, mod))
+	for _, key := range A.keys() {
+		addon := A[key]
+		output = append(output, fmt.Sprintf("%s:\n%v", addon.meta.key, addon))
 	}
 
 	return strings.Join(output, "\n")
 }
 
-func (M Mods) keys() []string {
-	keys := make([]string, 0, len(M))
-	for key := range M {
+func (A AddOns) keys() []string {
+	keys := make([]string, 0, len(A))
+	for key := range A {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
@@ -179,35 +179,35 @@ func (M Mods) keys() []string {
 	return keys
 }
 
-// Helper function to print mods
-func (M Mods) Print(format string, deps bool) string {
+// Helper function to print addons
+func (A AddOns) Print(format string, deps bool) string {
 	count := 0
 	output := []string{}
 
-	for _, key := range M.keys() {
-		mod := M[key]
+	for _, key := range A.keys() {
+		addon := A[key]
 
 		// Don't print out submodules
-		if mod.IsSubmodule() {
+		if addon.IsSubmodule() {
 			continue
 		}
 
-		if !mod.meta.dependency || deps {
+		if !addon.meta.dependency || deps {
 			switch format {
 			case "json":
-				// output = append(output, fmt.Sprintln(mod))
+				// output = append(output, fmt.Sprintln(addon))
 			case "header":
-				output = append(output, fmt.Sprintln(mod.Header()))
+				output = append(output, fmt.Sprintln(addon.Header()))
 			case "markdown":
-				output = append(output, fmt.Sprintln(mod.Markdown()))
+				output = append(output, fmt.Sprintln(addon.Markdown()))
 			default:
-				output = append(output, fmt.Sprintln(mod.Simple()))
+				output = append(output, fmt.Sprintln(addon.Simple()))
 			}
 			count++
 		}
 	}
 
-	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "mods")), "")
+	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "AddOns")), "")
 }
 
 // Helper Functions

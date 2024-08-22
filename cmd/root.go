@@ -17,7 +17,7 @@ var cfgFile string
 var RootCmd = &cobra.Command{
 	Use:     "esotools",
 	Version: "0.1.0",
-	Short:   "tools used to list, install, and validate ESO mods",
+	Short:   "tools used to list, install, and validate ESO AddOns",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.

@@ -1,4 +1,4 @@
-package modTools
+package addonTools
 
 import (
 	"fmt"
@@ -12,25 +12,25 @@ import (
 func init() {
 	AppFs = afero.NewMemMapFs()
 	esoHome := filepath.Join("/tmp", "eso")
-	modPath := filepath.Join(esoHome, "live", "AddOns", "TestMod")
+	addonPath := filepath.Join(esoHome, "live", "AddOns", "TestAddOn")
 
-	AppFs.MkdirAll(modPath, 0755)
-	afero.WriteFile(AppFs, filepath.Join(modPath, "TestMod.txt"), []byte("## Title: Test Mod\n"), 0644)
+	AppFs.MkdirAll(addonPath, 0755)
+	afero.WriteFile(AppFs, filepath.Join(addonPath, "TestAddOn.txt"), []byte("## Title: Test AddOn\n"), 0644)
 }
 
-func TestFindMods(t *testing.T) {
+func TestFindAddOns(t *testing.T) {
 	t.Run("ENV-SET", func(t *testing.T) {
 		esoHome := filepath.Join("/tmp", "eso")
 		afero.WriteFile(AppFs, ".env", []byte(fmt.Sprintf("ESO_HOME=%q", esoHome)), 0644)
 		t.Setenv("ESO_HOME", esoHome)
 
-		mods, err := FindMods()
+		addons, err := FindAddOns()
 
 		assert.Nil(t, err, "Expected no error")
-		assert.Equal(t, 1, len(mods), "Expected 1 mod to be found")
+		assert.Equal(t, 1, len(addons), "Expected 1 AddOn to be found")
 	})
 	t.Run("ENV-NOT-SET", func(t *testing.T) {
-		_, err := FindMods()
+		_, err := FindAddOns()
 
 		assert.NotNil(t, err, "Expected an error")
 		assert.Equal(t, "please set the ESO_HOME environment variable and try again", err.Error(), "Expected error message")
@@ -40,7 +40,7 @@ func TestFindMods(t *testing.T) {
 		afero.WriteFile(AppFs, ".env", []byte(fmt.Sprintf("ESO_HOME=%q", esoHome)), 0644)
 		t.Setenv("ESO_HOME", esoHome)
 
-		_, err := FindMods()
+		_, err := FindAddOns()
 
 		assert.NotNil(t, err, "Expected an error")
 		assert.Equal(t, "\"/tmp/eso/invalid\" is not a valid ESO HOME directory", err.Error(), "Expected error message")

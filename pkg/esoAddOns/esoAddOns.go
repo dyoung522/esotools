@@ -49,13 +49,13 @@ type AddOn struct {
 }
 
 func NewAddOn(key string) (AddOn, error) {
-	id := ToKey(key)
+	key = ToKey(key)
 
-	if key == "" || id == "" {
+	if key == "" {
 		return AddOn{}, fmt.Errorf("key is required")
 	}
 
-	return AddOn{meta: addonMeta{key: ToKey(key)}}, nil
+	return AddOn{meta: addonMeta{key: key}}, nil
 }
 
 func (A AddOn) String() string {
@@ -86,7 +86,7 @@ func (A AddOn) String() string {
 }
 
 func (A AddOn) ToOnelineMarkdown() string {
-	return fmt.Sprintf("- %s", A.TitleString())
+	return fmt.Sprint("- ", A.TitleString())
 }
 
 func (A AddOn) ToHeader() string {
@@ -117,7 +117,13 @@ func (A AddOn) ToHeader() string {
 }
 
 func (A AddOn) ToMarkdown() string {
-	return fmt.Sprintf("## %s\n\n%s\n", A.TitleString(), A.Description)
+	var description string
+
+	if A.Description != "" {
+		description = fmt.Sprintf("\n%s\n", A.Description)
+	}
+
+	return fmt.Sprintf("## %s\n%s", A.TitleString(), description)
 }
 
 func (A AddOn) ToJson() ([]byte, error) {

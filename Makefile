@@ -12,6 +12,9 @@ clean_bin:
 
 clean: clean_bin tidy
 
+check: clean
+	trunk check
+
 build: vet clean_bin build-osx build-win
 
 build-osx:
@@ -22,3 +25,6 @@ build-win:
 
 test:
 	ginkgo -r
+
+# Git Hooks
+pre-commit: clean check test

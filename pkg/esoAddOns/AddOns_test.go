@@ -30,7 +30,7 @@ var _ = Describe("AddOns", func() {
 	Describe("ToKey()", func() {
 		Context("when a string is provided", func() {
 			It("should return a key", func() {
-				Expect(esoAddOns.ToKey("Test AddOn")).To(Equal("TestAddOn"))
+				Expect(esoAddOns.ToKey("Test AddOn ")).To(Equal("Test-AddOn"))
 			})
 		})
 	})

@@ -45,7 +45,7 @@ func getAddOnList(path string, addons *[]esoAddOnFiles.AddOnDefinition, err erro
 
 	md := esoAddOnFiles.AddOnDefinition{
 		Name: filepath.Base(path),
-		Dir:  strings.TrimPrefix(strings.TrimPrefix(filepath.Dir(path), AddOnsPath), "/"),
+		Dir:  strings.TrimPrefix(filepath.Dir(path), AddOnsPath),
 	}
 
 	if filepath.Ext(md.Name) == ".txt" && esoAddOns.ToKey(filepath.Base(md.Dir)) == md.Key() {

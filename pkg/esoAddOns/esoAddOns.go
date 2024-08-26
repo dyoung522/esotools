@@ -3,6 +3,7 @@ package esoAddOns
 import (
 	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -163,7 +164,8 @@ func (A AddOn) IsLibrary() bool {
 }
 
 func (A AddOn) IsSubmodule() bool {
-	return len(strings.Split(A.meta.dir, "/")) > 1
+	files, _ := filepath.Split(A.meta.dir)
+	return len(files) > 1
 }
 
 func (A *AddOn) AddError(err error) {
@@ -294,6 +296,5 @@ func (A AddOns) Print(format string) string {
 
 // Helper Functions
 func ToKey(input string) string {
-	// return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(input), " ", "_"))
-	return strings.ReplaceAll(strings.TrimSpace(input), " ", "")
+	return strings.ReplaceAll(strings.TrimSpace(input), " ", "-")
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 
 	sub1 "github.com/dyoung522/esotools/cmd/list"
+	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -27,6 +28,14 @@ var RootCmd = &cobra.Command{
 // Execute adds all child commands to the root command and sets flags appropriately.
 // This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
+	cc.Init(&cc.Config{
+		RootCmd:  RootCmd,
+		Headings: cc.HiCyan + cc.Bold + cc.Underline,
+		Commands: cc.HiYellow + cc.Bold,
+		Example:  cc.Italic,
+		ExecName: cc.Bold,
+		Flags:    cc.Bold,
+	})
 
 	err := RootCmd.Execute()
 	if err != nil {

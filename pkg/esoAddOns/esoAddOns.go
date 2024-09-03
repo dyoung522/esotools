@@ -138,15 +138,14 @@ func (A AddOn) ToJson() ([]byte, error) {
 
 func (A AddOn) TitleString() string {
 	var (
-		cyan  = color.New(color.Bold, color.FgCyan).SprintfFunc()
-		blue  = color.New(color.Bold, color.FgBlue).SprintfFunc()
-		white = color.New(color.FgHiWhite).SprintfFunc()
+		cyan = color.New(color.Bold, color.FgCyan).SprintfFunc()
+		blue = color.New(color.Bold, color.FgBlue).SprintfFunc()
 	)
 
 	var (
 		title   = cyan(A.Title)
 		version = blue("v%s", A.Version)
-		author  = white(A.Author)
+		author  = A.Author
 	)
 
 	color.NoColor = viper.GetBool("noColor")

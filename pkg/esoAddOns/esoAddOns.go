@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/fatih/color"
 	"github.com/iancoleman/strcase"
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
@@ -136,7 +137,15 @@ func (A AddOn) ToJson() ([]byte, error) {
 }
 
 func (A AddOn) TitleString() string {
-	return fmt.Sprintf("%s (v%s) by %v", A.Title, A.Version, A.Author)
+	var (
+		title   = color.GreenString(A.Title)
+		version = color.BlueString(A.Version)
+		author  = color.YellowString(A.Author)
+	)
+
+	color.NoColor = viper.GetBool("noColor")
+
+	return fmt.Sprintf("%s (v%s) by %v", title, version, author)
 }
 
 func (A *AddOn) SetDir(dir string) {
@@ -263,6 +272,8 @@ func (A AddOns) Print(format string) string {
 		addons      = []AddOn{}
 	)
 
+	color.NoColor = viper.GetBool("noColor")
+
 	for _, key := range A.keys() {
 		addon := A[key]
 
@@ -291,7 +302,8 @@ func (A AddOns) Print(format string) string {
 		return string(jout)
 	}
 
-	return strings.Join(append(output, fmt.Sprintln("\nTotal:", count, "AddOns")), "")
+	toBlue := color.New(color.FgBlue).SprintfFunc()
+	return strings.Join(append(output, fmt.Sprintln(toBlue("\nTotal: %d AddOns", count))), "")
 }
 
 // Helper Functions

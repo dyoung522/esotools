@@ -3,6 +3,7 @@ module github.com/dyoung522/esotools
 go 1.23.0
 
 require (
+	github.com/fatih/color v1.17.0
 	github.com/iancoleman/strcase v0.3.0
 	github.com/ivanpirog/coloredcobra v1.0.1
 	github.com/onsi/ginkgo/v2 v2.20.1
@@ -14,7 +15,6 @@ require (
 )
 
 require (
-	github.com/fatih/color v1.17.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
 	github.com/go-logr/logr v1.4.2 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect

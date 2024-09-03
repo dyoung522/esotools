@@ -45,14 +45,24 @@ func Execute() {
 
 func init() {
 	// var Verbose int
+	var err error
 
 	cobra.OnInitialize(initConfig)
 
 	RootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.esotools.yaml)")
 	RootCmd.PersistentFlags().StringP("esohome", "H", "", "The full installation path of your ESO game files (where the `live` folder lives).")
 	RootCmd.PersistentFlags().CountP("verbose", "v", "counted verbosity")
+	RootCmd.PersistentFlags().BoolP("no-color", "N", false, "do not output ANSI color codes")
 
-	viper.BindPFlag("eso_home", RootCmd.PersistentFlags().Lookup("esohome"))
+	err = viper.BindPFlag("eso_home", RootCmd.PersistentFlags().Lookup("esohome"))
+	if err != nil {
+		panic(err)
+	}
+
+	err = viper.BindPFlag("noColor", RootCmd.PersistentFlags().Lookup("no-color"))
+	if err != nil {
+		panic(err)
+	}
 
 	// Add subcommands
 	RootCmd.AddCommand(sub1.ListCmd)

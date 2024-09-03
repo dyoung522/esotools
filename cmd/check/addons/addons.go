@@ -61,7 +61,7 @@ var CheckAddOnsCmd = &cobra.Command{
 		for _, key := range addons.Keys() {
 			addon := addons[key]
 
-			if verbosity >= 1 {
+			if verbosity >= 2 {
 				cyan.Printf("Checking %s\n", key)
 			}
 
@@ -79,7 +79,7 @@ var CheckAddOnsCmd = &cobra.Command{
 					continue
 				}
 
-				if verbosity >= 1 {
+				if verbosity >= 2 {
 					var descriptor = pluralize("dependency", numberOfDependencies)
 
 					if first {
@@ -98,13 +98,13 @@ var CheckAddOnsCmd = &cobra.Command{
 						}
 
 						if first {
-							errors[key] = append(errors[key], missingDependency)
+							errors[missingDependency] = append(errors[missingDependency], key)
 						} else {
-							warnings[key] = append(warnings[key], missingDependency)
+							warnings[missingDependency] = append(warnings[missingDependency], key)
 						}
 					}
 
-					if verbosity >= 1 {
+					if verbosity >= 2 {
 						if first {
 							red.Println("X")
 						} else {
@@ -112,7 +112,7 @@ var CheckAddOnsCmd = &cobra.Command{
 						}
 					}
 				} else {
-					if verbosity >= 1 {
+					if verbosity >= 2 {
 						green.Println("√")
 					}
 				}
@@ -125,42 +125,45 @@ var CheckAddOnsCmd = &cobra.Command{
 			fmt.Println()
 		}
 
-		var keys = []string{}
+		if len(warnings) > 0 {
+			printErrors(&warnings, "optional")
+		}
 
 		if len(errors) > 0 {
-			var descriptor = pluralize("dependency", len(errors))
-
-			for k := range errors {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, key := range keys {
-				red.Printf("%s is missing %d required %s: %s\n", key, len(errors[key]), descriptor, strings.Join(errors[key], ", "))
-			}
-			fmt.Println()
-		}
-
-		if len(warnings) > 0 {
-			var descriptor = pluralize("dependency", len(errors))
-
-			for k := range warnings {
-				keys = append(keys, k)
-			}
-			sort.Strings(keys)
-
-			for _, key := range keys {
-				yellow.Printf("%s is missing %d optional %s: %s\n", key, len(errors[key]), descriptor, strings.Join(errors[key], ", "))
-			}
-			fmt.Println()
-		}
-
-		if len(errors) > 0 || len(warnings) > 0 {
+			printErrors(&errors, "required")
 			os.Exit(1)
-		} else {
-			green.Printf("\nAll %d Addons Ok\n", len(addons))
 		}
+
+		green.Printf("\nAll %d Addons Ok\n", len(addons))
 	},
+}
+
+func printErrors(errors *map[string][]string, dependencyType string) {
+	var color = pterm.NewStyle(pterm.FgRed)
+	var keys = []string{}
+
+	if dependencyType == "optional" {
+		color = pterm.NewStyle(pterm.FgYellow)
+	}
+
+	for k := range *errors {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, key := range keys {
+		numberOfDependencies := len((*errors)[key])
+		descriptor := pluralize("AddOn", numberOfDependencies)
+
+		// fmt.Printf("%s is an  %d %s %s: %s\n", key, len((*errors)[key]), dependencyType, descriptor, color.Sprint(strings.Join((*errors)[key], ", ")))
+		fmt.Printf(
+			"%s is a missing %s dependency for %s -> %s\n",
+			color.Add(*pterm.Bold.ToStyle()).Sprintf("%-30s", key),
+			color.Sprint(dependencyType),
+			cyan.Add(*pterm.Bold.ToStyle()).Sprintf("%d %-6s", numberOfDependencies, descriptor),
+			blue.Sprint(pterm.DefaultParagraph.WithMaxWidth(80).Sprint(strings.Join((*errors)[key], ", "))),
+		)
+	}
 }
 
 func checkDependencies(addons *esoAddOns.AddOns, dependencies []string) []string {
@@ -186,14 +189,15 @@ func checkDependencies(addons *esoAddOns.AddOns, dependencies []string) []string
 }
 
 func pluralize(s string, c int) string {
-	if c > 1 {
-		if strings.HasSuffix(s, "y") {
-			return s[:len(s)-1] + "ies"
-		}
-		return s + "s"
+	if c == 1 {
+		return s
 	}
 
-	return s
+	if strings.HasSuffix(s, "y") {
+		return s[:len(s)-1] + "ies"
+	}
+
+	return s + "s"
 }
 
 func init() {

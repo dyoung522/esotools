@@ -195,6 +195,10 @@ func (A AddOn) Key() string {
 	return A.meta.key
 }
 
+func (A AddOn) CompareVersion(version string) int {
+	return strings.Compare(A.Version, version)
+}
+
 func (A *AddOn) Validate() bool {
 	if A.Title == "" {
 		caser := cases.Title(language.English)
@@ -250,7 +254,7 @@ func (A *AddOns) Find(key string) (AddOn, bool) {
 func (A AddOns) Strings() string {
 	output := []string{}
 
-	for _, key := range A.keys() {
+	for _, key := range A.Keys() {
 		addon := A[key]
 		output = append(output, fmt.Sprintf("%s:\n%v", addon.meta.key, addon))
 	}
@@ -258,7 +262,7 @@ func (A AddOns) Strings() string {
 	return strings.Join(output, "\n")
 }
 
-func (A AddOns) keys() []string {
+func (A AddOns) Keys() []string {
 	keys := make([]string, 0, len(A))
 	for key := range A {
 		keys = append(keys, key)
@@ -280,7 +284,7 @@ func (A AddOns) Print(format string) string {
 
 	color.NoColor = viper.GetBool("noColor")
 
-	for _, key := range A.keys() {
+	for _, key := range A.Keys() {
 		addon := A[key]
 
 		// Don't print out submodules

@@ -136,8 +136,8 @@ func cleanString(input string) string {
 }
 
 // Removes version dependencies and returns the plain dependency name
-func dependencyName(input string) string {
-	return strings.Split(input, ">")[0]
+func DependencyName(input string) []string {
+	return strings.Split(strings.TrimRight(input, "\r\n"), ">=")
 }
 
 func markDependencies(addons *esoAddOns.AddOns) {
@@ -153,7 +153,7 @@ func markDependencies(addons *esoAddOns.AddOns) {
 		}
 
 		for _, dependency := range addon.DependsOn {
-			dependencyName := dependencyName(dependency)
+			dependencyName := DependencyName(dependency)[0]
 
 			// Skip self-references
 			if dependencyName == "" || esoAddOns.ToKey(dependencyName) == key {

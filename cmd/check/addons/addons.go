@@ -8,17 +8,17 @@ import (
 
 	"github.com/dyoung522/esotools/pkg/addonTools"
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
-	"github.com/fatih/color"
+	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var (
-	red    = color.New(color.FgRed)
-	yellow = color.New(color.FgYellow)
-	green  = color.New(color.FgGreen)
-	cyan   = color.New(color.FgCyan)
-	blue   = color.New(color.FgBlue)
+	red    = pterm.NewStyle(pterm.FgRed)
+	yellow = pterm.NewStyle(pterm.FgYellow)
+	green  = pterm.NewStyle(pterm.FgGreen)
+	cyan   = pterm.NewStyle(pterm.FgCyan)
+	blue   = pterm.NewStyle(pterm.FgBlue)
 )
 
 var flags struct {
@@ -53,7 +53,9 @@ var CheckAddOnsCmd = &cobra.Command{
 		errors = make(map[string][]string)
 		warnings = make(map[string][]string)
 
-		color.NoColor = viper.GetBool("noColor")
+		if viper.GetBool("noColor") {
+			pterm.DisableColor()
+		}
 
 		// Check each addon for dependencies, we use Keys() because it's sorted
 		for _, key := range addons.Keys() {
@@ -119,7 +121,11 @@ var CheckAddOnsCmd = &cobra.Command{
 			}
 		}
 
-		var keys []string
+		if verbosity >= 1 {
+			fmt.Println()
+		}
+
+		var keys = []string{}
 
 		if len(errors) > 0 {
 			var descriptor = pluralize("dependency", len(errors))

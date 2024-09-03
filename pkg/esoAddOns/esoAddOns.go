@@ -138,14 +138,20 @@ func (A AddOn) ToJson() ([]byte, error) {
 
 func (A AddOn) TitleString() string {
 	var (
-		title   = color.GreenString(A.Title)
-		version = color.BlueString(A.Version)
-		author  = color.YellowString(A.Author)
+		cyan  = color.New(color.Bold, color.FgCyan).SprintfFunc()
+		blue  = color.New(color.Bold, color.FgBlue).SprintfFunc()
+		white = color.New(color.FgHiWhite).SprintfFunc()
+	)
+
+	var (
+		title   = cyan(A.Title)
+		version = blue("v%s", A.Version)
+		author  = white(A.Author)
 	)
 
 	color.NoColor = viper.GetBool("noColor")
 
-	return fmt.Sprintf("%s (v%s) by %v", title, version, author)
+	return fmt.Sprintf("%s (%s) by %v", title, version, author)
 }
 
 func (A *AddOn) SetDir(dir string) {

@@ -195,10 +195,6 @@ func (A AddOn) Key() string {
 	return A.meta.key
 }
 
-func (A AddOn) CompareVersion(version string) int {
-	return strings.Compare(A.Version, version)
-}
-
 func (A *AddOn) Validate() bool {
 	if A.Title == "" {
 		caser := cases.Title(language.English)

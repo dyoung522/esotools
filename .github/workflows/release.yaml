@@ -2,7 +2,8 @@ on:
   push:
     # Sequence of patterns matched against refs/tags
     tags:
-      - "v*" # Push events to matching v*, i.e. v1.0, v20.15.10
+      - v* # Push events to matching v*, i.e. v1.0, v20.15.10
+permissions: read-all
 name: Build Release
 jobs:
   release-darwin-amd64:
@@ -17,7 +18,7 @@ jobs:
           GOARCH: amd64
           GOOS: darwin
           GO111MODULE: on
-          EXTRA_FILES: "LICENSE README.md"
+          EXTRA_FILES: LICENSE README.md
   release-windows-amd64:
     name: release windows/amd64
     runs-on: ubuntu-latest
@@ -30,4 +31,4 @@ jobs:
           GOARCH: amd64
           GOOS: windows
           GO111MODULE: on
-          EXTRA_FILES: "LICENSE README.md"
+          EXTRA_FILES: LICENSE README.md

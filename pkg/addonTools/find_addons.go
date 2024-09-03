@@ -9,10 +9,7 @@ import (
 	"github.com/dyoung522/esotools/pkg/esoAddOnFiles"
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
 	"github.com/spf13/afero"
-	"github.com/spf13/viper"
 )
-
-var verbosity = viper.GetInt("verbosity")
 
 func FindAddOns(AppFs afero.Fs) ([]esoAddOnFiles.AddOnDefinition, error) {
 	var err error
@@ -43,12 +40,20 @@ func getAddOnList(path string, addons *[]esoAddOnFiles.AddOnDefinition, err erro
 		return err
 	}
 
+	if verbosity >= 5 {
+		fmt.Println("Searching", path)
+	}
+
 	md := esoAddOnFiles.AddOnDefinition{
 		Name: filepath.Base(path),
 		Dir:  strings.TrimPrefix(filepath.Dir(path), AddOnsPath),
 	}
 
 	if filepath.Ext(md.Name) == ".txt" && esoAddOns.ToKey(filepath.Base(md.Dir)) == md.Key() {
+		if verbosity >= 3 {
+			fmt.Println("Found", md.Name)
+		}
+
 		*addons = append(*addons, md)
 	}
 

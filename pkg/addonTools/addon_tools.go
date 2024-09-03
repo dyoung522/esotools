@@ -13,6 +13,7 @@ import (
 
 var ESOHOME string
 var AddOnsPath string
+var verbosity int
 
 func Run() (esoAddOns.AddOns, []error) {
 	var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
@@ -26,9 +27,13 @@ func Run() (esoAddOns.AddOns, []error) {
 
 	AddOnsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "AddOns")
 
-	if viper.GetInt("verbosity") >= 1 {
+	if verbosity >= 1 {
 		fmt.Printf("Searching for AddOns in %q\n\n", AddOnsPath)
 	}
 
 	return GetAddOns(AppFs)
+}
+
+func init() {
+	verbosity = viper.GetInt("verbosity")
 }

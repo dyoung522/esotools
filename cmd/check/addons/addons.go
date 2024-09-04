@@ -30,112 +30,113 @@ var CheckAddOnsCmd = &cobra.Command{
 	Use:   "addons",
 	Short: "Checks dependencies for ESO AddOns",
 	Long:  `Checks AddOns installed in the ESO AddOns directory, and reports any errors`,
+	Run:   execute,
+}
 
-	Run: func(cmd *cobra.Command, args []string) {
-		var errors, warnings map[string][]string
-		var missingDependencies []string
-		var dependencyArray = [2][]string{}
-		var verbosity = viper.GetInt("verbosity")
+func execute(cmd *cobra.Command, args []string) {
+	var errors, warnings map[string][]string
+	var missingDependencies []string
+	var dependencyArray = [2][]string{}
+	var verbosity = viper.GetInt("verbosity")
 
-		if verbosity >= 1 {
-			fmt.Println("Building a list of addons and their dependencies... please wait...")
+	if verbosity >= 1 {
+		fmt.Println("Building a list of addons and their dependencies... please wait...")
+	}
+
+	addons, errs := addonTools.Run()
+
+	if len(errs) > 0 {
+		for _, e := range errs {
+			fmt.Println(e)
+		}
+		os.Exit(2)
+	}
+
+	errors = make(map[string][]string)
+	warnings = make(map[string][]string)
+
+	if viper.GetBool("noColor") {
+		pterm.DisableColor()
+	}
+
+	// Check each addon for dependencies, we use Keys() because it's sorted
+	for _, key := range addons.Keys() {
+		addon := addons[key]
+
+		if verbosity >= 2 {
+			cyan.Printf("Checking %s\n", key)
 		}
 
-		addons, errs := addonTools.Run()
+		dependencyArray[0] = addon.DependsOn
+		if flags.optional {
+			dependencyArray[1] = addon.OptionalDependsOn
+		}
 
-		if len(errs) > 0 {
-			for _, e := range errs {
-				fmt.Println(e)
+		var first = true // Used to determine if we're checking optional dependencies
+		for _, dependencies := range dependencyArray {
+			numberOfDependencies := len(dependencies)
+
+			if numberOfDependencies == 0 {
+				first = false // first element may be empty
+				continue
 			}
-			os.Exit(2)
-		}
-
-		errors = make(map[string][]string)
-		warnings = make(map[string][]string)
-
-		if viper.GetBool("noColor") {
-			pterm.DisableColor()
-		}
-
-		// Check each addon for dependencies, we use Keys() because it's sorted
-		for _, key := range addons.Keys() {
-			addon := addons[key]
 
 			if verbosity >= 2 {
-				cyan.Printf("Checking %s\n", key)
+				var descriptor = addonTools.Pluralize("dependency", numberOfDependencies)
+
+				if first {
+					blue.Printf("\tchecking %2d required %-15s ", numberOfDependencies, descriptor)
+				} else {
+					blue.Printf("\tchecking %2d optional %-15s ", numberOfDependencies, descriptor)
+				}
 			}
 
-			dependencyArray[0] = addon.DependsOn
-			if flags.optional {
-				dependencyArray[1] = addon.OptionalDependsOn
-			}
+			missingDependencies = checkDependencies(&addons, dependencies)
 
-			var first = true // Used to determine if we're checking optional dependencies
-			for _, dependencies := range dependencyArray {
-				numberOfDependencies := len(dependencies)
+			if len(missingDependencies) > 0 {
+				for _, missingDependency := range missingDependencies {
+					if missingDependency == "" {
+						continue
+					}
 
-				if numberOfDependencies == 0 {
-					first = false // first element may be empty
-					continue
+					if first {
+						errors[missingDependency] = append(errors[missingDependency], key)
+					} else {
+						warnings[missingDependency] = append(warnings[missingDependency], key)
+					}
 				}
 
 				if verbosity >= 2 {
-					var descriptor = addonTools.Pluralize("dependency", numberOfDependencies)
-
 					if first {
-						blue.Printf("\tchecking %2d required %-15s ", numberOfDependencies, descriptor)
+						red.Println("X")
 					} else {
-						blue.Printf("\tchecking %2d optional %-15s ", numberOfDependencies, descriptor)
+						yellow.Println("X")
 					}
 				}
-
-				missingDependencies = checkDependencies(&addons, dependencies)
-
-				if len(missingDependencies) > 0 {
-					for _, missingDependency := range missingDependencies {
-						if missingDependency == "" {
-							continue
-						}
-
-						if first {
-							errors[missingDependency] = append(errors[missingDependency], key)
-						} else {
-							warnings[missingDependency] = append(warnings[missingDependency], key)
-						}
-					}
-
-					if verbosity >= 2 {
-						if first {
-							red.Println("X")
-						} else {
-							yellow.Println("X")
-						}
-					}
-				} else {
-					if verbosity >= 2 {
-						green.Println("√")
-					}
+			} else {
+				if verbosity >= 2 {
+					green.Println("√")
 				}
-
-				first = false
 			}
-		}
 
-		if verbosity >= 1 {
-			fmt.Println()
+			first = false
 		}
+	}
 
-		if len(warnings) > 0 {
-			printErrors(&warnings, "optional")
-		}
+	if verbosity >= 1 {
+		fmt.Println()
+	}
 
-		if len(errors) > 0 {
-			printErrors(&errors, "required")
-			os.Exit(1)
-		}
+	if len(warnings) > 0 {
+		printErrors(&warnings, "optional")
+	}
 
-		green.Printf("\nAll %d Addons Ok\n", len(addons))
-	},
+	if len(errors) > 0 {
+		printErrors(&errors, "required")
+		os.Exit(1)
+	}
+
+	green.Printf("\nAll %d Addons Ok\n", len(addons))
 }
 
 func printErrors(errors *map[string][]string, dependencyType string) {

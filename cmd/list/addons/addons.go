@@ -9,14 +9,14 @@ import (
 	"github.com/spf13/viper"
 )
 
-var (
-	ofSimple   bool = true
-	ofMarkdown bool
-	ofJSON     bool
-	ofRaw      bool
-	noDeps     bool
-	noLibs     bool
-)
+var flags struct {
+	simple   bool
+	markdown bool
+	json     bool
+	raw      bool
+	noDeps   bool
+	noLibs   bool
+}
 
 // ListAddOnsCmd represents the addons command
 var ListAddOnsCmd = &cobra.Command{
@@ -38,11 +38,11 @@ By default, this will print out a simple list with only one AddOn per line. Howe
 		}
 
 		switch {
-		case ofJSON:
+		case flags.json:
 			fmt.Println(addons.Print("json"))
-		case ofMarkdown:
+		case flags.markdown:
 			fmt.Println(addons.Print("markdown"))
-		case ofRaw:
+		case flags.raw:
 			fmt.Println(addons.Print("header"))
 		default:
 			fmt.Println(addons.Print("simple"))
@@ -53,19 +53,19 @@ By default, this will print out a simple list with only one AddOn per line. Howe
 func init() {
 	var err error
 
-	ListAddOnsCmd.Flags().BoolVarP(&ofJSON, "json", "j", false, "Print out the list in JSON format")
-	ListAddOnsCmd.Flags().BoolVarP(&ofMarkdown, "markdown", "m", false, "Print out the list in markdown format")
-	ListAddOnsCmd.Flags().BoolVarP(&ofRaw, "raw", "r", false, "Print out the list in the RAW ESO AddOn header format (most verbose)")
-	ListAddOnsCmd.Flags().BoolVarP(&ofSimple, "simple", "s", false, "Prints the AddOn listing in simple plain text")
+	ListAddOnsCmd.Flags().BoolVarP(&flags.json, "json", "j", false, "Print out the list in JSON format")
+	ListAddOnsCmd.Flags().BoolVarP(&flags.markdown, "markdown", "m", false, "Print out the list in markdown format")
+	ListAddOnsCmd.Flags().BoolVarP(&flags.raw, "raw", "r", false, "Print out the list in the RAW ESO AddOn header format (most verbose)")
+	ListAddOnsCmd.Flags().BoolVarP(&flags.simple, "simple", "s", false, "Prints the AddOn listing in simple plain text")
 	ListAddOnsCmd.MarkFlagsMutuallyExclusive("json", "markdown", "raw", "simple")
 
-	ListAddOnsCmd.Flags().BoolVarP(&noLibs, "no-libs", "L", false, "Suppresses printing of AddOns that are considered Libraries")
+	ListAddOnsCmd.Flags().BoolVarP(&flags.noLibs, "no-libs", "L", false, "Suppresses printing of AddOns that are considered Libraries")
 	err = viper.BindPFlag("noLibs", ListAddOnsCmd.Flags().Lookup("no-libs"))
 	if err != nil {
 		panic(err)
 	}
 
-	ListAddOnsCmd.Flags().BoolVarP(&noDeps, "no-deps", "D", false, "Suppresses printing of AddOns that are dependencies of other AddOns")
+	ListAddOnsCmd.Flags().BoolVarP(&flags.noDeps, "no-deps", "D", false, "Suppresses printing of AddOns that are dependencies of other AddOns")
 	err = viper.BindPFlag("noDeps", ListAddOnsCmd.Flags().Lookup("no-deps"))
 	if err != nil {
 		panic(err)

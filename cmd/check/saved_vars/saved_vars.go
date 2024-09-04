@@ -30,80 +30,81 @@ var CheckSavedVarsCmd = &cobra.Command{
 	Use:   "savedvars",
 	Short: "Checks validity of ESO SavedVariables files",
 	Long:  "Specifically, it reports on extraneous SavedVariable files that do not correspond to any known AddOn.\nOptionally, you can auto-remove them with the --clean flag.",
+	Run:   execute,
+}
 
-	Run: func(cmd *cobra.Command, args []string) {
-		var verbosity = viper.GetInt("verbosity")
-		var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
-		var extraneousSavedVars []addonTools.SavedVars
+func execute(cmd *cobra.Command, args []string) {
+	var verbosity = viper.GetInt("verbosity")
+	var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
+	var extraneousSavedVars []addonTools.SavedVars
 
-		if verbosity >= 1 {
-			fmt.Println("Building a list of addons and their dependencies... please wait...")
+	if verbosity >= 1 {
+		fmt.Println("Building a list of addons and their dependencies... please wait...")
+	}
+
+	addons, errs := addonTools.Run()
+
+	if len(errs) > 0 {
+		for _, e := range errs {
+			fmt.Println(e)
+		}
+		os.Exit(2)
+	}
+
+	if verbosity >= 2 {
+		cmd.Println("Checking SavedVariables")
+	}
+
+	savedVarFiles, err := addonTools.FindSavedVars(AppFs)
+	if err != nil {
+		cmd.Println(err)
+		os.Exit(2)
+	}
+
+	for _, savedVar := range savedVarFiles {
+		savedVarKey := strings.TrimSuffix(savedVar.FileInfo.Name(), ".lua")
+
+		// Skip Zenemax Online files
+		if strings.HasPrefix(savedVarKey, "ZO_") {
+			continue
 		}
 
-		addons, errs := addonTools.Run()
+		if _, err := addons.Find(savedVarKey); !err {
+			extraneousSavedVars = append(extraneousSavedVars, savedVar)
+		}
+	}
 
-		if len(errs) > 0 {
-			for _, e := range errs {
-				fmt.Println(e)
+	var numberOfExtraneousSavedVars = len(extraneousSavedVars)
+
+	if numberOfExtraneousSavedVars > 0 {
+		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, addonTools.Pluralize("file", numberOfExtraneousSavedVars))
+
+		if verbosity >= 1 || flags.clean {
+			for _, savedVar := range extraneousSavedVars {
+				fmt.Printf("- %s\n", cyan.Sprint(savedVar.FileInfo.Name()))
 			}
-			os.Exit(2)
 		}
 
-		if verbosity >= 2 {
-			cmd.Println("Checking SavedVariables")
-		}
+		if flags.clean {
+			var prompt = "Remove above files?"
 
-		savedVarFiles, err := addonTools.FindSavedVars(AppFs)
-		if err != nil {
-			cmd.Println(err)
-			os.Exit(2)
-		}
-
-		for _, savedVar := range savedVarFiles {
-			savedVarKey := strings.TrimSuffix(savedVar.FileInfo.Name(), ".lua")
-
-			// Skip Zenemax Online files
-			if strings.HasPrefix(savedVarKey, "ZO_") {
-				continue
+			if flags.dryRun {
+				prompt += " [dry-run enabled]"
 			}
 
-			if _, err := addons.Find(savedVarKey); !err {
-				extraneousSavedVars = append(extraneousSavedVars, savedVar)
-			}
-		}
-
-		var numberOfExtraneousSavedVars = len(extraneousSavedVars)
-
-		if numberOfExtraneousSavedVars > 0 {
-			yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, addonTools.Pluralize("file", numberOfExtraneousSavedVars))
-
-			if verbosity >= 1 || flags.clean {
+			if result, _ := pterm.DefaultInteractiveConfirm.Show(prompt); result {
 				for _, savedVar := range extraneousSavedVars {
-					fmt.Printf("- %s\n", cyan.Sprint(savedVar.FileInfo.Name()))
-				}
-			}
-
-			if flags.clean {
-				var prompt = "Remove above files?"
-
-				if flags.dryRun {
-					prompt += " [dry-run enabled]"
-				}
-
-				if result, _ := pterm.DefaultInteractiveConfirm.Show(prompt); result {
-					for _, savedVar := range extraneousSavedVars {
-						if flags.dryRun {
-							yellow.Printf("Would have removed: %q\n", savedVar.FullPath())
-						} else {
-							if err := AppFs.Remove(savedVar.FullPath()); err != nil {
-								red.Printf("Error removing %s: %s\n", savedVar.FileInfo.Name(), err)
-							}
+					if flags.dryRun {
+						yellow.Printf("Would have removed: %q\n", savedVar.FullPath())
+					} else {
+						if err := AppFs.Remove(savedVar.FullPath()); err != nil {
+							red.Printf("Error removing %s: %s\n", savedVar.FileInfo.Name(), err)
 						}
 					}
 				}
 			}
 		}
-	},
+	}
 }
 
 func init() {

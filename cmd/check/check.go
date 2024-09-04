@@ -2,6 +2,7 @@ package cmd
 
 import (
 	sub1 "github.com/dyoung522/esotools/cmd/check/addons"
+	sub2 "github.com/dyoung522/esotools/cmd/check/saved_vars"
 	"github.com/spf13/cobra"
 )
 
@@ -13,6 +14,7 @@ var CheckCmd = &cobra.Command{
 
 func init() {
 	CheckCmd.AddCommand(sub1.CheckAddOnsCmd)
+	CheckCmd.AddCommand(sub2.CheckSavedVarsCmd)
 
 	// Here you will define your flags and configuration settings.
 

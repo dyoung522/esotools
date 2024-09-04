@@ -80,7 +80,7 @@ var CheckAddOnsCmd = &cobra.Command{
 				}
 
 				if verbosity >= 2 {
-					var descriptor = pluralize("dependency", numberOfDependencies)
+					var descriptor = addonTools.Pluralize("dependency", numberOfDependencies)
 
 					if first {
 						blue.Printf("\tchecking %2d required %-15s ", numberOfDependencies, descriptor)
@@ -153,7 +153,7 @@ func printErrors(errors *map[string][]string, dependencyType string) {
 
 	for _, key := range keys {
 		numberOfDependencies := len((*errors)[key])
-		descriptor := pluralize("AddOn", numberOfDependencies)
+		descriptor := addonTools.Pluralize("AddOn", numberOfDependencies)
 
 		// fmt.Printf("%s is an  %d %s %s: %s\n", key, len((*errors)[key]), dependencyType, descriptor, color.Sprint(strings.Join((*errors)[key], ", ")))
 		fmt.Printf(
@@ -186,18 +186,6 @@ func checkDependencies(addons *esoAddOns.AddOns, dependencies []string) []string
 	}
 
 	return missingDependencies
-}
-
-func pluralize(s string, c int) string {
-	if c == 1 {
-		return s
-	}
-
-	if strings.HasSuffix(s, "y") {
-		return s[:len(s)-1] + "ies"
-	}
-
-	return s + "s"
 }
 
 func init() {

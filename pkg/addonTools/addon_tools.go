@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
 	"github.com/spf13/afero"
@@ -13,10 +14,11 @@ import (
 
 var ESOHOME string
 var AddOnsPath string
-var verbosity int
+var SavedVarsPath string
 
 func Run() (esoAddOns.AddOns, []error) {
 	var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
+	var verbosity = viper.GetInt("verbosity")
 
 	ESOHOME = string(viper.GetString("eso_home"))
 
@@ -26,14 +28,24 @@ func Run() (esoAddOns.AddOns, []error) {
 	}
 
 	AddOnsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "AddOns")
+	SavedVarsPath = filepath.Join(filepath.Clean(string(ESOHOME)), "live", "SavedVariables")
 
-	if verbosity >= 1 {
-		fmt.Printf("Searching for AddOns in %q\n\n", AddOnsPath)
+	if verbosity >= 2 {
+		fmt.Printf("Searching for AddOns in %q\n", AddOnsPath)
+		fmt.Printf("Searching for SavedVariables in %q\n", SavedVarsPath)
 	}
 
 	return GetAddOns(AppFs)
 }
 
-func init() {
-	verbosity = viper.GetInt("verbosity")
+func Pluralize(s string, c int) string {
+	if c == 1 {
+		return s
+	}
+
+	if strings.HasSuffix(s, "y") {
+		return s[:len(s)-1] + "ies"
+	}
+
+	return s + "s"
 }

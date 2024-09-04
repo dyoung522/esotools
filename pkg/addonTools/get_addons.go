@@ -12,11 +12,13 @@ import (
 
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
 	"github.com/spf13/afero"
+	"github.com/spf13/viper"
 )
 
 func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
-	var addons = esoAddOns.AddOns{}
 	var errs = []error{}
+	var addons = esoAddOns.AddOns{}
+	var verbosity = viper.GetInt("verbosity")
 
 	addonlist, err := FindAddOns(AppFs)
 	if err != nil {

@@ -6,6 +6,7 @@ package cmd
 import (
 	"os"
 
+	sub3 "github.com/dyoung522/esotools/cmd/backup"
 	sub2 "github.com/dyoung522/esotools/cmd/check"
 	sub1 "github.com/dyoung522/esotools/cmd/list"
 	cc "github.com/ivanpirog/coloredcobra"
@@ -68,6 +69,7 @@ func init() {
 	// Add subcommands
 	RootCmd.AddCommand(sub1.ListCmd)
 	RootCmd.AddCommand(sub2.CheckCmd)
+	RootCmd.AddCommand(sub3.BackupCmd)
 }
 
 // initConfig reads in config file and ENV variables if set.

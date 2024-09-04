@@ -15,19 +15,22 @@ import (
 func FindAddOns(AppFs afero.Fs) ([]esoAddOnFiles.AddOnDefinition, error) {
 	var err error
 	var addons []esoAddOnFiles.AddOnDefinition
-	var verbosity = viper.GetInt("verbosity")
 
-	if ok, err := afero.DirExists(AppFs, AddOnsPath); !ok || err != nil {
-		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", ESOHOME)
+	verbosity := viper.GetInt("verbosity")
+	esohome := string(viper.GetString("eso_home"))
+	addonsPath := AddOnsPath()
+
+	if ok, err := afero.DirExists(AppFs, addonsPath); !ok || err != nil {
+		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", esohome)
 	}
 
 	if verbosity >= 2 {
-		fmt.Println("Searching", AddOnsPath)
+		fmt.Println("Searching", addonsPath)
 	}
 
-	err = afero.Walk(AppFs, AddOnsPath, func(path string, info fs.FileInfo, err error) error { return getAddOnList(path, &addons, err) })
+	err = afero.Walk(AppFs, addonsPath, func(path string, info fs.FileInfo, err error) error { return getAddOnList(path, &addons, err) })
 	if err != nil {
-		return nil, fmt.Errorf("error occurred while walking %q: %w", AddOnsPath, err)
+		return nil, fmt.Errorf("error occurred while walking %q: %w", addonsPath, err)
 	}
 
 	if verbosity >= 2 {
@@ -50,7 +53,7 @@ func getAddOnList(path string, addons *[]esoAddOnFiles.AddOnDefinition, err erro
 
 	md := esoAddOnFiles.AddOnDefinition{
 		Name: filepath.Base(path),
-		Dir:  strings.TrimPrefix(filepath.Dir(path), AddOnsPath),
+		Dir:  strings.TrimPrefix(filepath.Dir(path), AddOnsPath()),
 	}
 
 	if filepath.Ext(md.Name) == ".txt" && esoAddOns.ToKey(filepath.Base(md.Dir)) == md.Key() {

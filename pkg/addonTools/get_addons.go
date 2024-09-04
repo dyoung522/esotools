@@ -29,7 +29,7 @@ func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
 
 	for _, addonFile := range addonlist {
-		file, err := AppFs.Open(filepath.Join(AddOnsPath, addonFile.Path()))
+		file, err := AppFs.Open(filepath.Join(AddOnsPath(), addonFile.Path()))
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error opening file: %w", err))
 			continue

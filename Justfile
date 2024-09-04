@@ -2,7 +2,7 @@ default: check
 
 ## Main Commands
 
-build: fmt clean test build-osx build-linux build-win
+build: fmt clean build-osx build-linux build-win
 clean: clean-bin tidy
 
 ## Supporting Commands
@@ -31,13 +31,13 @@ clean-bin:
 ## Build sub-commands
 
 build-osx:
-	GOOS=darwin GOARCH=amd64 go build -o "bin/$(shell basename $(PWD))-osx" ./main.go
+	GOOS=darwin GOARCH=amd64 go build -o "bin/$(basename ${PWD})-osx" ./main.go
 
 build-linux:
-	GOOS=linux GOARCH=amd64 go build -o "bin/$(shell basename $(PWD))-linux" ./main.go
+	GOOS=linux GOARCH=amd64 go build -o "bin/$(basename ${PWD})-linux" ./main.go
 
 build-win:
-	GOOS=windows GOARCH=amd64 go build -o "bin/$(shell basename $(PWD)).exe" ./main.go
+	GOOS=windows GOARCH=amd64 go build -o "bin/$(basename ${PWD}).exe" ./main.go
 
 ## Git Hooks
 pre-commit: clean check test

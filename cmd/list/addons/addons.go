@@ -51,6 +51,8 @@ By default, this will print out a simple list with only one AddOn per line. Howe
 }
 
 func init() {
+	var err error
+
 	ListAddOnsCmd.Flags().BoolVarP(&ofJSON, "json", "j", false, "Print out the list in JSON format")
 	ListAddOnsCmd.Flags().BoolVarP(&ofMarkdown, "markdown", "m", false, "Print out the list in markdown format")
 	ListAddOnsCmd.Flags().BoolVarP(&ofRaw, "raw", "r", false, "Print out the list in the RAW ESO AddOn header format (most verbose)")
@@ -58,8 +60,14 @@ func init() {
 	ListAddOnsCmd.MarkFlagsMutuallyExclusive("json", "markdown", "raw", "simple")
 
 	ListAddOnsCmd.Flags().BoolVarP(&noLibs, "no-libs", "L", false, "Suppresses printing of AddOns that are considered Libraries")
-	viper.BindPFlag("noLibs", ListAddOnsCmd.Flags().Lookup("no-libs"))
+	err = viper.BindPFlag("noLibs", ListAddOnsCmd.Flags().Lookup("no-libs"))
+	if err != nil {
+		panic(err)
+	}
 
 	ListAddOnsCmd.Flags().BoolVarP(&noDeps, "no-deps", "D", false, "Suppresses printing of AddOns that are dependencies of other AddOns")
-	viper.BindPFlag("noDeps", ListAddOnsCmd.Flags().Lookup("no-deps"))
+	err = viper.BindPFlag("noDeps", ListAddOnsCmd.Flags().Lookup("no-deps"))
+	if err != nil {
+		panic(err)
+	}
 }

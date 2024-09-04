@@ -12,7 +12,6 @@ import (
 
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
 	"github.com/spf13/afero"
-	"github.com/spf13/viper"
 )
 
 func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
@@ -45,6 +44,10 @@ func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 		if err != nil {
 			errs = append(errs, fmt.Errorf("could not create addon: %w", err))
 			continue
+		}
+
+		if verbosity >= 3 {
+			fmt.Printf("Parsing %s\n", addonFile.Path())
 		}
 
 		addon.SetDir(addonFile.Dir)
@@ -94,7 +97,7 @@ func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 				case "IsLibrary":
 					addon.SetLibrary(cleanedString == "true")
 				default:
-					if viper.GetInt("verbosity") >= 3 {
+					if verbosity >= 3 {
 						fmt.Println(fmt.Errorf("unknown type: %s with value: %s", matches[typeIndex], matches[dataIndex]))
 					}
 				}
@@ -116,9 +119,6 @@ func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 
 		if addon.Validate() {
 			addons.Add(addon)
-		} else {
-			// Ignore addons with errors (for now)
-			// errs = append(errs, fmt.Errorf("invalid addon: %s\n%v", addon.ID(), addon.Errors()))
 		}
 	}
 
@@ -136,8 +136,8 @@ func cleanString(input string) string {
 }
 
 // Removes version dependencies and returns the plain dependency name
-func dependencyName(input string) string {
-	return strings.Split(input, ">")[0]
+func DependencyName(input string) []string {
+	return strings.Split(strings.TrimRight(input, "\r\n"), ">=")
 }
 
 func markDependencies(addons *esoAddOns.AddOns) {
@@ -153,7 +153,7 @@ func markDependencies(addons *esoAddOns.AddOns) {
 		}
 
 		for _, dependency := range addon.DependsOn {
-			dependencyName := dependencyName(dependency)
+			dependencyName := DependencyName(dependency)[0]
 
 			// Skip self-references
 			if dependencyName == "" || esoAddOns.ToKey(dependencyName) == key {

@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/fatih/color"
 	"github.com/iancoleman/strcase"
+	"github.com/pterm/pterm"
 	"github.com/spf13/viper"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
@@ -138,18 +138,19 @@ func (A AddOn) ToJson() ([]byte, error) {
 
 func (A AddOn) TitleString() string {
 	var (
-		cyan  = color.New(color.Bold, color.FgCyan).SprintfFunc()
-		blue  = color.New(color.Bold, color.FgBlue).SprintfFunc()
-		white = color.New(color.FgHiWhite).SprintfFunc()
+		cyan = pterm.NewStyle(pterm.Bold, pterm.FgCyan)
+		blue = pterm.NewStyle(pterm.Bold, pterm.FgBlue)
 	)
 
 	var (
-		title   = cyan(A.Title)
-		version = blue("v%s", A.Version)
-		author  = white(A.Author)
+		title   = cyan.Sprint(A.Title)
+		version = blue.Sprintf("v%s", A.Version)
+		author  = A.Author
 	)
 
-	color.NoColor = viper.GetBool("noColor")
+	if viper.GetBool("noColor") {
+		pterm.DisableColor()
+	}
 
 	return fmt.Sprintf("%s (%s) by %v", title, version, author)
 }
@@ -250,7 +251,7 @@ func (A *AddOns) Find(key string) (AddOn, bool) {
 func (A AddOns) Strings() string {
 	output := []string{}
 
-	for _, key := range A.keys() {
+	for _, key := range A.Keys() {
 		addon := A[key]
 		output = append(output, fmt.Sprintf("%s:\n%v", addon.meta.key, addon))
 	}
@@ -258,7 +259,7 @@ func (A AddOns) Strings() string {
 	return strings.Join(output, "\n")
 }
 
-func (A AddOns) keys() []string {
+func (A AddOns) Keys() []string {
 	keys := make([]string, 0, len(A))
 	for key := range A {
 		keys = append(keys, key)
@@ -278,9 +279,11 @@ func (A AddOns) Print(format string) string {
 		addons      = []AddOn{}
 	)
 
-	color.NoColor = viper.GetBool("noColor")
+	if viper.GetBool("noColor") {
+		pterm.DisableColor()
+	}
 
-	for _, key := range A.keys() {
+	for _, key := range A.Keys() {
 		addon := A[key]
 
 		// Don't print out submodules
@@ -308,8 +311,8 @@ func (A AddOns) Print(format string) string {
 		return string(jout)
 	}
 
-	toBlue := color.New(color.FgBlue).SprintfFunc()
-	return strings.Join(append(output, fmt.Sprintln(toBlue("\nTotal: %d AddOns", count))), "")
+	blue := pterm.NewStyle(pterm.FgBlue)
+	return strings.Join(append(output, blue.Sprintf("\nTotal: %d AddOns", count)), "")
 }
 
 // Helper Functions

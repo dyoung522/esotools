@@ -39,10 +39,6 @@ func execute(cmd *cobra.Command, args []string) {
 	var dependencyArray = [2][]string{}
 	var verbosity = viper.GetInt("verbosity")
 
-	if verbosity >= 1 {
-		fmt.Println("Building a list of addons and their dependencies... please wait...")
-	}
-
 	addons, errs := addonTools.Run()
 
 	if len(errs) > 0 {

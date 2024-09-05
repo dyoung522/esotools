@@ -41,12 +41,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var AppFs = afero.NewOsFs()
 	var extraneousSavedVars []addonTools.SavedVars
 
-	if verbosity >= 1 {
-		fmt.Println("Building a list of addons and their dependencies... please wait...")
-	}
-
 	addons, errs := addonTools.Run()
-
 	if len(errs) > 0 {
 		for _, e := range errs {
 			fmt.Println(e)

@@ -18,7 +18,7 @@ func init() {
 	AppFs = afero.NewMemMapFs()
 	_ = AppFs.MkdirAll("/tmp/eso/live/AddOns", 0755)
 
-	viper.Set("esohome", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso")
 }
 
 func TestGetAddOns_EmptyAddonList(t *testing.T) {

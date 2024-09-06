@@ -14,7 +14,7 @@ import (
 func TestFindAddOns(t *testing.T) {
 	// Create a new in-memory file system
 	var fs = afero.NewMemMapFs()
-	viper.Set("esohome", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso")
 
 	// Populate the file system with some addon files
 	_ = fs.MkdirAll("/tmp/eso/live/AddOns/MyAddon1", 0755)
@@ -43,7 +43,7 @@ func TestFindAddOnsError(t *testing.T) {
 
 	// Create a new in-memory file system
 	var fs = afero.NewMemMapFs()
-	viper.Set("esohome", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso")
 
 	// Populate the file system with some addon files
 	_ = fs.MkdirAll("/tmp/eso/live/AddOns/MyAddon1", 0755)

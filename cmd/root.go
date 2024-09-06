@@ -19,7 +19,7 @@ var cfgFile string
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
 	Use:     "esotools",
-	Version: "0.2.0",
+	Version: "0.2.1",
 	Short:   "tools used to list, install, and validate ESO AddOns",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbosity, _ := cmd.Flags().GetCount("verbose")
@@ -56,7 +56,7 @@ func init() {
 	RootCmd.PersistentFlags().CountP("verbose", "v", "counted verbosity")
 	RootCmd.PersistentFlags().BoolP("no-color", "N", false, "do not output ANSI color codes")
 
-	err = viper.BindPFlag("esohome", RootCmd.PersistentFlags().Lookup("esohome"))
+	err = viper.BindPFlag("eso_home", RootCmd.PersistentFlags().Lookup("esohome"))
 	if err != nil {
 		panic(err)
 	}

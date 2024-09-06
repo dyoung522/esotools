@@ -12,7 +12,7 @@ import (
 func TestAddOnsPath_WithValidESOHome(t *testing.T) {
 	// Arrange
 	expected := "/home/user/eso/live/AddOns"
-	viper.Set("esohome", "/home/user/eso")
+	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
 	actual := addonTools.AddOnsPath()
@@ -25,7 +25,7 @@ func TestAddOnsPath_WithEmptyESOHome(t *testing.T) {
 	g := NewWithT(t)
 
 	// Arrange
-	viper.Set("esohome", "")
+	viper.Set("eso_home", "")
 
 	// Assert
 	g.Expect(func() { addonTools.AddOnsPath() }).To(PanicWith("ESO_HOME environment variable not set"))
@@ -34,7 +34,7 @@ func TestAddOnsPath_WithEmptyESOHome(t *testing.T) {
 func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
 	// Arrange
 	expected := "/home/user/path with spaces/live/AddOns"
-	viper.Set("esohome", "/home/user/path with spaces")
+	viper.Set("eso_home", "/home/user/path with spaces")
 
 	// Act
 	actual := addonTools.AddOnsPath()
@@ -46,7 +46,7 @@ func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
 func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 	// Arrange
 	path := "/home/user/path-with-sp3c14l-char$"
-	viper.Set("esohome", path)
+	viper.Set("eso_home", path)
 
 	expected := path + "/live/AddOns"
 
@@ -60,7 +60,7 @@ func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 func TestSavedVariablesPath_WithValidESOHome(t *testing.T) {
 	// Arrange
 	expected := "/home/user/eso/live/SavedVariables"
-	viper.Set("esohome", "/home/user/eso")
+	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
 	actual := addonTools.SavedVariablesPath()
@@ -73,7 +73,7 @@ func TestSavedVariablesPath_WithEmptyESOHome(t *testing.T) {
 	g := NewWithT(t)
 
 	// Arrange
-	viper.Set("esohome", "")
+	viper.Set("eso_home", "")
 
 	// Assert
 	g.Expect(func() { addonTools.SavedVariablesPath() }).To(PanicWith("ESO_HOME environment variable not set"))

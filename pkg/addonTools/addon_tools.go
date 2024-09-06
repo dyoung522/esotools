@@ -15,9 +15,9 @@ import (
 func Run() (esoAddOns.AddOns, []error) {
 	var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
 	var verbosity = viper.GetInt("verbosity")
-	var esohome = string(viper.GetString("esohome"))
+	var eso_home = string(viper.GetString("eso_home"))
 
-	if esohome == "" {
+	if eso_home == "" {
 		fmt.Println(errors.New("please set the ESO_HOME environment variable and try again"))
 		os.Exit(1)
 	}
@@ -35,23 +35,23 @@ func Run() (esoAddOns.AddOns, []error) {
 }
 
 func AddOnsPath() string {
-	var esohome = string(viper.GetString("esohome"))
+	var eso_home = string(viper.GetString("eso_home"))
 
-	if esohome == "" {
+	if eso_home == "" {
 		panic("ESO_HOME environment variable not set")
 	}
 
-	return filepath.Join(filepath.Clean(string(esohome)), "live", "AddOns")
+	return filepath.Join(filepath.Clean(string(eso_home)), "live", "AddOns")
 }
 
 func SavedVariablesPath() string {
-	var esohome = string(viper.GetString("esohome"))
+	var eso_home = string(viper.GetString("eso_home"))
 
-	if esohome == "" {
+	if eso_home == "" {
 		panic("ESO_HOME environment variable not set")
 	}
 
-	return filepath.Join(filepath.Clean(string(esohome)), "live", "SavedVariables")
+	return filepath.Join(filepath.Clean(string(eso_home)), "live", "SavedVariables")
 }
 
 func Pluralize(s string, c int) string {

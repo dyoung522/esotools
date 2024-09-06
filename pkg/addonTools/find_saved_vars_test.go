@@ -13,7 +13,7 @@ import (
 func TestFindSavedVars(t *testing.T) {
 	// Create a new in-memory file system
 	var fs = afero.NewMemMapFs()
-	viper.Set("esohome", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso")
 
 	// Populate the file system with some addon files
 	_ = fs.MkdirAll("/tmp/eso/live/SavedVariables", 0755)
@@ -37,7 +37,7 @@ func TestFindSavedVarsError(t *testing.T) {
 
 	// Create a new in-memory file system
 	var fs = afero.NewMemMapFs()
-	viper.Set("esohome", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso")
 
 	// Populate the file system with some addon files
 	_ = fs.MkdirAll("/tmp/eso/live/SavedVariables", 0755)

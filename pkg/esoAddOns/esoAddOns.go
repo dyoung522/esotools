@@ -72,8 +72,8 @@ func (A AddOn) String() string {
 	return fmt.Sprintf(
 		"Title: %s, Description: %s, Author: %v, Version: %s, AddOnVersion: %s, APIVersion: %s, SavedVariables: %s, DependsOn: %s, OptionalDependsOn: %s, IsDependency: %v, IsLibrary: %v",
 		A.CleanTitle(),
-		A.Description,
-		A.Author,
+		A.CleanDescription(),
+		A.CleanAuthor(),
 		A.Version,
 		A.AddOnVersion,
 		A.APIVersion,
@@ -116,7 +116,7 @@ func (A AddOn) ToMarkdown() string {
 	var description string
 
 	if A.Description != "" {
-		description = fmt.Sprintf("\n%s\n", A.Description)
+		description = fmt.Sprintf("\n%s\n", A.CleanDescription())
 	}
 
 	return fmt.Sprintf("## %s\n%s", A.TitleString(), description)
@@ -144,7 +144,7 @@ func (A AddOn) TitleString() string {
 	var (
 		title   = cyan.Sprint(A.CleanTitle())
 		version = blue.Sprintf("v%s", A.Version)
-		author  = A.Author
+		author  = A.CleanAuthor()
 	)
 
 	if viper.GetBool("noColor") {
@@ -230,22 +230,19 @@ func (A *AddOn) Validate() bool {
 	return len(A.Errors()) == 0
 }
 
+// CleanAuthor returns the Author without any ESO color codes
+func (A AddOn) CleanAuthor() string {
+	return StripESOColorCodes(A.Author)
+}
+
 // CleanTitle returns the Title without any ESO color codes
 func (A AddOn) CleanTitle() string {
-	if !strings.Contains(A.Title, `|c`) {
-		return A.Title
-	}
+	return StripESOColorCodes(A.Title)
+}
 
-	colorRE := regexp.MustCompile(`\|c[[:xdigit:]]{6}`)
-	re := regexp.MustCompile(`\|c[[:xdigit:]]{6}(.*?)(?:\|r)`)
-
-	cleanTitle := re.ReplaceAllStringFunc(A.Title, func(match string) string {
-		parts := re.FindStringSubmatch(match)
-		return parts[1]
-	})
-
-	// Strip out any remaining color codes from the clean title.
-	return colorRE.ReplaceAllString(cleanTitle, "")
+// CleanDescription returns the Author without any ESO color codes
+func (A AddOn) CleanDescription() string {
+	return StripESOColorCodes(A.Description)
 }
 
 /*
@@ -369,4 +366,21 @@ func (A AddOns) Print(format string) string {
 // It replaces any spaces in the input string with hyphens.
 func ToKey(input string) string {
 	return strings.ReplaceAll(strings.TrimSpace(input), " ", "-")
+}
+
+func StripESOColorCodes(input string) string {
+	if !strings.Contains(input, `|c`) {
+		return input
+	}
+
+	colorRE := regexp.MustCompile(`\|c[[:xdigit:]]{6}`)
+	re := regexp.MustCompile(`\|c[[:xdigit:]]{6}(.*?)(?:\|r)`)
+
+	cleanString := re.ReplaceAllStringFunc(input, func(match string) string {
+		parts := re.FindStringSubmatch(match)
+		return parts[1]
+	})
+
+	// Strip out any remaining color codes from the clean title.
+	return colorRE.ReplaceAllString(cleanString, "")
 }

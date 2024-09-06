@@ -170,47 +170,44 @@ func TestValidateTitle_InvalidAddon(t *testing.T) {
 	assert.Equal(t, addon1.Errors(), expectedErrors)
 }
 
-func TestCleanTitle_WithColorCode(t *testing.T) {
-	addon1 := esoAddOns.AddOn{Title: "|c121212Addon|r One", Author: "Author One", Version: "1.0"}
+func TestStripESOColorCodes(t *testing.T) {
+	tests := []struct {
+		name   string
+		input  string
+		expect string
+	}{
+		{
+			name:   "no color codes",
+			input:  "Test String",
+			expect: "Test String",
+		},
+		{
+			name:   "single color code",
+			input:  "|c121212Test|r String",
+			expect: "Test String",
+		},
+		{
+			name:   "multiple color codes",
+			input:  "|c121212Test|r String |c323232Multiple|r Codes",
+			expect: "Test String Multiple Codes",
+		},
+		{
+			name:   "color codes at end of string",
+			input:  "|c121212Test|r String |c323232Multiple|r",
+			expect: "Test String Multiple",
+		},
+		{
+			name:   "invalid color codes",
+			input:  "|c00FF00Test |cFFFF00String|r",
+			expect: "Test String",
+		},
+	}
 
-	output := addon1.CleanTitle()
-	expected := "Addon One"
-
-	assert.Equal(t, expected, output)
-}
-
-func TestCleanTitle_WithMultipleColorCode(t *testing.T) {
-	addon1 := esoAddOns.AddOn{Title: "|c121212Addon|r One |c323232Forever|r Clean", Author: "Author One", Version: "1.0"}
-
-	output := addon1.CleanTitle()
-	expected := "Addon One Forever Clean"
-
-	assert.Equal(t, expected, output)
-}
-
-func TestCleanTitle_WithMultipleColorCodeAtEnd(t *testing.T) {
-	addon1 := esoAddOns.AddOn{Title: "|c121212Addon|r One |c323232Forever|r", Author: "Author One", Version: "1.0"}
-
-	output := addon1.CleanTitle()
-	expected := "Addon One Forever"
-
-	assert.Equal(t, expected, output)
-}
-
-func TestCleanTitle_WithInvalidColorCodes(t *testing.T) {
-	addon1 := esoAddOns.AddOn{Title: "|c00FF00Addon |cFFFF00One|r", Author: "Author One", Version: "1.0"}
-
-	output := addon1.CleanTitle()
-	expected := "Addon One"
-
-	assert.Equal(t, expected, output)
-}
-
-func TestCleanTitle_WithoutColorCode(t *testing.T) {
-	addon1 := esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"}
-
-	output := addon1.CleanTitle()
-	expected := "Addon One"
-
-	assert.Equal(t, expected, output)
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			assert := assert.New(t)
+			actual := esoAddOns.StripESOColorCodes(tt.input)
+			assert.Equal(tt.expect, actual, "Expected %q, but got %q", tt.expect, actual)
+		})
+	}
 }

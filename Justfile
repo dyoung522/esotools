@@ -2,7 +2,7 @@ default: check
 
 ## Main Commands
 
-build: fmt clean build-osx build-linux build-win
+build: fmt clean test build-osx build-linux build-win
 clean: clean-bin tidy
 
 ## Supporting Commands
@@ -23,10 +23,13 @@ check-all: fmt-all
 	trunk check --all
 
 test:
-	ginkgo -r
+	go test ./pkg/...
 
 clean-bin:
 	rm -f bin/*
+
+update: tidy
+  go get -u
 
 ## Build sub-commands
 

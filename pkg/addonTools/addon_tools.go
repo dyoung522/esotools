@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/dyoung522/esotools/pkg/esoAddOns"
+	"github.com/gertd/go-pluralize"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
@@ -15,7 +15,7 @@ import (
 func Run() (esoAddOns.AddOns, []error) {
 	var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
 	var verbosity = viper.GetInt("verbosity")
-	var esohome = string(viper.GetString("eso_home"))
+	var esohome = string(viper.GetString("esohome"))
 
 	if esohome == "" {
 		fmt.Println(errors.New("please set the ESO_HOME environment variable and try again"))
@@ -35,25 +35,31 @@ func Run() (esoAddOns.AddOns, []error) {
 }
 
 func AddOnsPath() string {
-	var esohome = string(viper.GetString("eso_home"))
+	var esohome = string(viper.GetString("esohome"))
+
+	if esohome == "" {
+		panic("ESO_HOME environment variable not set")
+	}
 
 	return filepath.Join(filepath.Clean(string(esohome)), "live", "AddOns")
 }
 
 func SavedVariablesPath() string {
-	var esohome = string(viper.GetString("eso_home"))
+	var esohome = string(viper.GetString("esohome"))
+
+	if esohome == "" {
+		panic("ESO_HOME environment variable not set")
+	}
 
 	return filepath.Join(filepath.Clean(string(esohome)), "live", "SavedVariables")
 }
 
 func Pluralize(s string, c int) string {
+	var pluralize = pluralize.NewClient()
+
 	if c == 1 {
 		return s
 	}
 
-	if strings.HasSuffix(s, "y") {
-		return s[:len(s)-1] + "ies"
-	}
-
-	return s + "s"
+	return pluralize.Plural(s)
 }

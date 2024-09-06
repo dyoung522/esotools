@@ -42,7 +42,7 @@ eso_home: "/<your-home-directory>/Documents/Elder Scrolls Online"
 
 The advantage to this method is that you only need to do this once, and then can simply run `esotools` without supplying any additional information.
 
-***PLEASE NOTE: DO NOT include the `live` folder as part of your path.***
+**_PLEASE NOTE: DO NOT include the `live` folder as part of your path._**
 
 ### Other Configuration Options
 

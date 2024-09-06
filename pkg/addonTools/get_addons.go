@@ -121,6 +121,10 @@ func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 
 		if addon.Validate() {
 			addons.Add(addon)
+		} else {
+			for _, err := range addon.Errors() {
+				errs = append(errs, fmt.Errorf("addon %s: %w", addon.Key(), err))
+			}
 		}
 	}
 

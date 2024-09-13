@@ -18,8 +18,8 @@ var cfgFile string
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
-	Use:     "esotools",
-	Version: "0.2.2",
+	Use:     "esotools <command> [flags]",
+	Version: "0.2.3",
 	Short:   "tools used to list, install, and validate ESO AddOns",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbosity, _ := cmd.Flags().GetCount("verbose")

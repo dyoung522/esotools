@@ -23,4 +23,3 @@ A separate desktop application with full Mod Manager capabilities
   - [ ] View SavedVariable file contents
   - [ ] Edit SavedVariable files
 - [ ] Ability to have AddOn "profiles" which can be saved/swapped -- this would allow a user to create a "set" of AddOns and/or SavedVariables to be used for individual game sessions (unsure how useful this would be?)
-

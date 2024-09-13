@@ -1,6 +1,7 @@
 package addonTools_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/dyoung522/esotools/pkg/addonTools"
@@ -32,8 +33,8 @@ func TestFindAddOns(t *testing.T) {
 	assert.Len(t, addonList, 2, "expected 2 addons")
 
 	// Check that the function returned the expected paths for the addons
-	assert.Contains(t, addonList, esoAddOnFiles.AddOnDefinition{Name: "MyAddon1.txt", Dir: "/MyAddon1"}, "expected MyAddon1")
-	assert.Contains(t, addonList, esoAddOnFiles.AddOnDefinition{Name: "MyAddon2.txt", Dir: "/MyAddon2"}, "expected MyAddon2")
+	assert.Contains(t, addonList, esoAddOnFiles.AddOnDefinition{Name: "MyAddon1.txt", Dir: filepath.Clean("/MyAddon1")}, "expected MyAddon1")
+	assert.Contains(t, addonList, esoAddOnFiles.AddOnDefinition{Name: "MyAddon2.txt", Dir: filepath.Clean("/MyAddon2")}, "expected MyAddon2")
 }
 
 func TestFindAddOnsError(t *testing.T) {

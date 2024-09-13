@@ -1,6 +1,6 @@
 module github.com/dyoung522/esotools
 
-go 1.23.0
+go 1.23.1
 
 require (
 	github.com/gertd/go-pluralize v0.2.1

@@ -6,8 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dyoung522/esotools/pkg/addonTools"
-	"github.com/dyoung522/esotools/pkg/esoAddOns"
+	"github.com/dyoung522/esotools/lib/esoAddOns"
+	"github.com/dyoung522/esotools/pkg/addOnTools"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -39,7 +39,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var dependencyArray = [2][]string{}
 	var verbosity = viper.GetInt("verbosity")
 
-	addons, errs := addonTools.Run()
+	addons, errs := addOnTools.Run()
 
 	if len(errs) > 0 {
 		for _, e := range errs {
@@ -78,7 +78,7 @@ func execute(cmd *cobra.Command, args []string) {
 			}
 
 			if verbosity >= 2 {
-				var descriptor = addonTools.Pluralize("dependency", numberOfDependencies)
+				var descriptor = addOnTools.Pluralize("dependency", numberOfDependencies)
 
 				if first {
 					blue.Printf("\tchecking %2d required %-15s ", numberOfDependencies, descriptor)
@@ -150,7 +150,7 @@ func printErrors(errors *map[string][]string, dependencyType string) {
 
 	for _, key := range keys {
 		numberOfDependencies := len((*errors)[key])
-		descriptor := addonTools.Pluralize("AddOn", numberOfDependencies)
+		descriptor := addOnTools.Pluralize("AddOn", numberOfDependencies)
 
 		// fmt.Printf("%s is an  %d %s %s: %s\n", key, len((*errors)[key]), dependencyType, descriptor, color.Sprint(strings.Join((*errors)[key], ", ")))
 		fmt.Printf(
@@ -167,11 +167,11 @@ func checkDependencies(addons *esoAddOns.AddOns, dependencies []string) []string
 	var missingDependencies = []string{}
 
 	for _, dependency := range dependencies {
-		if len(addonTools.DependencyName(dependency)) == 0 {
+		if len(addOnTools.DependencyName(dependency)) == 0 {
 			continue
 		}
 
-		dependencyName := addonTools.DependencyName(dependency)[0]
+		dependencyName := addOnTools.DependencyName(dependency)[0]
 		if dependencyName == "" {
 			continue
 		}

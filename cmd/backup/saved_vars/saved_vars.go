@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dyoung522/esotools/pkg/addonTools"
+	"github.com/dyoung522/esotools/pkg/addOnTools"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// ListAddOnsCmd represents the addons command
 var BackupSavedVarsCmd = &cobra.Command{
 	Use:   "savedvars",
 	Short: "Create a ZIP backup file of all SavedVariables",
@@ -34,7 +33,7 @@ func BackupSavedVars(AppFs afero.Fs) error {
 	archiveTime := fmt.Sprintf("%d%02d%02d%02d%02d%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 	archiveFileName := fmt.Sprintf("saved_variables_%s.zip", archiveTime)
 
-	saveVarFiles, err := addonTools.FindSavedVars(AppFs)
+	saveVarFiles, err := addOnTools.FindSavedVars(AppFs)
 	if err != nil {
 		fmt.Println(err)
 		return err

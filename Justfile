@@ -24,7 +24,7 @@ check-all: fmt-all
     trunk check --all
 
 test:
-    go test ./pkg/...
+    go test ./pkg/... ./lib/...
 
 clean-bin:
     rm -f bin/*

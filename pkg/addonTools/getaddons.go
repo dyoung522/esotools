@@ -1,4 +1,4 @@
-package addonTools
+package addOnTools
 
 import (
 	"bufio"
@@ -10,7 +10,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/dyoung522/esotools/pkg/esoAddOns"
+	"github.com/dyoung522/esotools/lib/esoAddOns"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )

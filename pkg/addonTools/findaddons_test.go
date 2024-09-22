@@ -1,11 +1,11 @@
-package addonTools_test
+package addOnTools_test
 
 import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dyoung522/esotools/pkg/addonTools"
-	"github.com/dyoung522/esotools/pkg/esoAddOnFiles"
+	"github.com/dyoung522/esotools/lib/esoAddOns"
+	"github.com/dyoung522/esotools/pkg/addOnTools"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
@@ -24,7 +24,7 @@ func TestFindAddOns(t *testing.T) {
 	_ = afero.WriteFile(fs, "/tmp/eso/live/AddOns/MyAddon2/MyAddon2.txt", []byte("## Title: MyAddon2"), 0644)
 
 	// Call the function we're testing
-	addonList, err := addonTools.FindAddOns(fs)
+	addonList, err := addOnTools.FindAddOns(fs)
 
 	// Check that the function didn't return an error
 	assert.Nil(t, err, "expected no error")
@@ -33,12 +33,12 @@ func TestFindAddOns(t *testing.T) {
 	assert.Len(t, addonList, 2, "expected 2 addons")
 
 	// Check that the function returned the expected paths for the addons
-	assert.Contains(t, addonList, esoAddOnFiles.AddOnDefinition{Name: "MyAddon1.txt", Dir: filepath.Clean("/MyAddon1")}, "expected MyAddon1")
-	assert.Contains(t, addonList, esoAddOnFiles.AddOnDefinition{Name: "MyAddon2.txt", Dir: filepath.Clean("/MyAddon2")}, "expected MyAddon2")
+	assert.Contains(t, addonList, esoAddOns.AddOnDefinition{Name: "MyAddon1.txt", Dir: filepath.Clean("/MyAddon1")}, "expected MyAddon1")
+	assert.Contains(t, addonList, esoAddOns.AddOnDefinition{Name: "MyAddon2.txt", Dir: filepath.Clean("/MyAddon2")}, "expected MyAddon2")
 }
 
 func TestFindAddOnsError(t *testing.T) {
-	var addonList []esoAddOnFiles.AddOnDefinition
+	var addonList []esoAddOns.AddOnDefinition
 
 	g := NewWithT(t)
 
@@ -56,7 +56,7 @@ func TestFindAddOnsError(t *testing.T) {
 	_ = fs.Chmod("/tmp/eso/live/AddOns", 0555)
 
 	// Check that the function panics
-	g.Expect(func() { addonList, _ = addonTools.FindAddOns(fs) }).NotTo(Panic())
+	g.Expect(func() { addonList, _ = addOnTools.FindAddOns(fs) }).NotTo(Panic())
 
 	// Check that the function returned the expected message
 	assert.Len(t, addonList, 0, "expected 0 addons")

@@ -1,4 +1,4 @@
-package addonTools
+package addOnTools
 
 import (
 	"fmt"

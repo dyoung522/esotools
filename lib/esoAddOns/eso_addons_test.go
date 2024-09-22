@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/dyoung522/esotools/pkg/esoAddOns"
+	"github.com/dyoung522/esotools/lib/esoAddOns"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )

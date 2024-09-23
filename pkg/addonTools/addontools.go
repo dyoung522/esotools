@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/dyoung522/esotools/lib/esoAddOns"
+	"github.com/dyoung522/esotools/pkg/osTools"
 	"github.com/gertd/go-pluralize"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
@@ -55,22 +56,27 @@ func Pluralize(s string, c int) string {
 }
 
 func validateESOHOME() error {
-	var eso_home = string(viper.GetString("eso_home"))
-
-	if eso_home != "" {
-		return nil
-	}
-
-	eso_home, err := os.UserHomeDir()
-	if err != nil {
-		panic(err)
-	}
+	var err error
+	verbosity := viper.GetInt("verbosity")
+	eso_home := viper.GetString("eso_home")
 
 	if eso_home == "" {
-		return errors.New("ESO_HOME environment variable not set")
-	}
+		documentsDir, err := osTools.DocumentsDir()
 
-	eso_home = filepath.Join(eso_home, "Documents", "Elder Scrolls Online")
+		if err != nil {
+			return err
+		}
+
+		if documentsDir == "" {
+			return errors.New("Cannot determine the location of the ESO_HOME directory, please set it manually")
+		}
+
+		eso_home = filepath.Join(documentsDir, "Elder Scrolls Online")
+
+		if verbosity > 1 {
+			fmt.Printf("Autodiscovered ESO_HOME at %q\n", eso_home)
+		}
+	}
 
 	ok, err := afero.DirExists(AppFs, filepath.Join(eso_home, "live"))
 	if !ok || err != nil {

@@ -15,13 +15,13 @@ import (
 func TestFindAddOns(t *testing.T) {
 	// Create a new in-memory file system
 	var fs = afero.NewMemMapFs()
-	viper.Set("eso_home", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso/Elder Scrolls Online")
 
 	// Populate the file system with some addon files
-	_ = fs.MkdirAll("/tmp/eso/live/AddOns/MyAddon1", 0755)
-	_ = fs.MkdirAll("/tmp/eso/live/AddOns/MyAddon2", 0755)
-	_ = afero.WriteFile(fs, "/tmp/eso/live/AddOns/MyAddon1/MyAddon1.txt", []byte("## Title: MyAddon1"), 0644)
-	_ = afero.WriteFile(fs, "/tmp/eso/live/AddOns/MyAddon2/MyAddon2.txt", []byte("## Title: MyAddon2"), 0644)
+	_ = fs.MkdirAll("/tmp/eso/Elder Scrolls Online/live/AddOns/MyAddon1", 0755)
+	_ = fs.MkdirAll("/tmp/eso/Elder Scrolls Online/live/AddOns/MyAddon2", 0755)
+	_ = afero.WriteFile(fs, "/tmp/eso/Elder Scrolls Online/live/AddOns/MyAddon1/MyAddon1.txt", []byte("## Title: MyAddon1"), 0644)
+	_ = afero.WriteFile(fs, "/tmp/eso/Elder Scrolls Online/live/AddOns/MyAddon2/MyAddon2.txt", []byte("## Title: MyAddon2"), 0644)
 
 	// Call the function we're testing
 	addonList, err := addOnTools.FindAddOns(fs)

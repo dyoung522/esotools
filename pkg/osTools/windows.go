@@ -15,14 +15,14 @@ func DocumentsDir() (string, error) {
 	}
 	defer k.Close()
 
-	winDocsDir, _, err := k.GetStringValue("Personal")
+	docs, _, err := k.GetStringValue(`Personal`)
 	if err != nil {
 		return "", err
 	}
 
-	if winDocsDir == "" {
+	if docs == "" {
 		return "", nil
 	}
 
-	return filepath.Clean(winDocsDir), nil
+	return filepath.Clean(docs), nil
 }

@@ -16,7 +16,7 @@ var AppFs afero.Fs
 
 func init() {
 	AppFs = afero.NewMemMapFs()
-	_ = AppFs.MkdirAll("/tmp/eso/live/AddOns", 0755)
+	_ = AppFs.MkdirAll("/tmp/eso/Elder Scrolls Online/live/AddOns", 0755)
 
 	viper.Set("eso_home", "/tmp/eso")
 }

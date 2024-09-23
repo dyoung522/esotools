@@ -4,11 +4,12 @@ Planned features for upcoming releases.
 
 ## Near Term
 
-- [ ] Auto-discover ESO_HOME directory (only fail if it cannot be determined)
+- [x] Auto-discover ESO_HOME directory (only fail if it cannot be determined)
+- [x] Prompt the user for the ESO_HOME directory if it isn't configured and cannot be auto-discovered
 - [ ] Search/Install new AddOns (initially from ESO-UI but maybe other sources as well -- configurable?)
 - [ ] Ability to "auto-install" missing dependencies (`--install` flag?)
 
-## Long Term
+## Long Term (v1.0 +)
 
 ### Desktop Application (GUI)
 

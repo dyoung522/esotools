@@ -4,11 +4,13 @@ Copyright © 2024 Donovan C. Young <dyoung522@gmail.com>
 package cmd
 
 import (
+	"fmt"
 	"os"
 
 	sub3 "github.com/dyoung522/esotools/cmd/backup"
 	sub2 "github.com/dyoung522/esotools/cmd/check"
 	sub1 "github.com/dyoung522/esotools/cmd/list"
+	"github.com/dyoung522/esotools/pkg/addOnTools"
 	cc "github.com/ivanpirog/coloredcobra"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -24,6 +26,11 @@ var RootCmd = &cobra.Command{
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		verbosity, _ := cmd.Flags().GetCount("verbose")
 		viper.Set("verbosity", verbosity)
+		err := addOnTools.ValidateESOHOME()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
 	},
 }
 

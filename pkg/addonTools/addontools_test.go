@@ -11,7 +11,7 @@ import (
 
 func TestAddOnsPath_WithValidESOHome(t *testing.T) {
 	// Arrange
-	expected := filepath.Clean("/home/user/eso/live/AddOns")
+	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/AddOns")
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
@@ -35,7 +35,7 @@ func TestAddOnsPath_WithEmptyESOHome(t *testing.T) {
 
 func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
 	// Arrange
-	expected := filepath.Clean("/home/user/path with spaces/live/AddOns")
+	expected := filepath.Clean("/home/user/path with spaces/Elder Scrolls Online/live/AddOns")
 	viper.Set("eso_home", "/home/user/path with spaces")
 
 	// Act
@@ -50,7 +50,7 @@ func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 	path := filepath.Clean("/home/user/path-with-sp3c14l-char$")
 	viper.Set("eso_home", path)
 
-	expected := filepath.Join(path, "/live/AddOns")
+	expected := filepath.Join(path, "/Elder Scrolls Online/live/AddOns")
 
 	// Act
 	actual := addOnTools.AddOnsPath()
@@ -61,7 +61,7 @@ func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 
 func TestSavedVariablesPath_WithValidESOHome(t *testing.T) {
 	// Arrange
-	expected := filepath.Clean("/home/user/eso/live/SavedVariables")
+	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/SavedVariables")
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act

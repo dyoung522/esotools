@@ -132,7 +132,7 @@ func execute(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	green.Printf("\nAll %d Addons Ok\n", len(addons))
+	green.Printf("\nAll %d Required Dependencies Ok\n", len(addons))
 }
 
 func printErrors(errors *map[string][]string, dependencyType string) {

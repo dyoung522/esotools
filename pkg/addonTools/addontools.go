@@ -1,14 +1,14 @@
 package addOnTools
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/dyoung522/esotools/lib/esoAddOns"
 	"github.com/dyoung522/esotools/pkg/osTools"
 	"github.com/gertd/go-pluralize"
+	"github.com/pterm/pterm"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
@@ -17,18 +17,6 @@ var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
 
 func Run() (esoAddOns.AddOns, []error) {
 	var verbosity = viper.GetInt("verbosity")
-	err := validateESOHOME()
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	if verbosity >= 2 {
-		fmt.Printf("Using ESO_HOME: %q\n", filepath.Clean(viper.GetString("eso_home")))
-		fmt.Printf("Searching for AddOns in %q\n", AddOnsPath())
-		fmt.Printf("Searching for SavedVariables in %q\n", SavedVariablesPath())
-	}
 
 	if verbosity >= 1 {
 		fmt.Println("Building a list of addons and their dependencies... please wait...")
@@ -38,11 +26,11 @@ func Run() (esoAddOns.AddOns, []error) {
 }
 
 func AddOnsPath() string {
-	return filepath.Join(filepath.Clean(esoHome()), "live", "AddOns")
+	return filepath.Join(filepath.Clean(ESOHome()), "live", "AddOns")
 }
 
 func SavedVariablesPath() string {
-	return filepath.Join(filepath.Clean(esoHome()), "live", "SavedVariables")
+	return filepath.Join(filepath.Clean(ESOHome()), "live", "SavedVariables")
 }
 
 func Pluralize(s string, c int) string {
@@ -55,45 +43,74 @@ func Pluralize(s string, c int) string {
 	return pluralize.Plural(s)
 }
 
-func validateESOHOME() error {
-	var err error
+func ValidateESOHOME() error {
 	verbosity := viper.GetInt("verbosity")
-	eso_home := viper.GetString("eso_home")
+	esoHome := ESOHome()
 
-	if eso_home == "" {
+	if !checkESODir(esoHome) {
+		if esoHome != "" {
+			fmt.Println(fmt.Errorf("%q does not appear to be a valid ESO directory, attempting auto-detect", esoHome))
+		}
+
 		documentsDir, err := osTools.DocumentsDir()
-
 		if err != nil {
 			return err
 		}
 
-		if documentsDir == "" {
-			return errors.New("Cannot determine the location of the ESO_HOME directory, please set it manually")
+		esoHome = esoDir(documentsDir)
+
+		for !checkESODir(esoHome) {
+			fmt.Println(fmt.Errorf("%q is not a valid ESO directory\n", esoHome))
+
+			esoHome, err = pterm.DefaultInteractiveTextInput.WithDefaultValue(documentsDir).Show(`Enter the directory where your "Elder Scrools Online" documents folder lives [CTRL+C to exit]`)
+			if err != nil {
+				return err
+			}
+
+			esoHome = esoDir(esoHome)
 		}
 
-		eso_home = filepath.Join(documentsDir, "Elder Scrolls Online")
-
-		if verbosity > 1 {
-			fmt.Printf("Autodiscovered ESO_HOME at %q\n", eso_home)
+		if verbosity >= 2 {
+			fmt.Printf("ESO_HOME set to %q\n", esoHome)
 		}
-	}
 
-	ok, err := afero.DirExists(AppFs, filepath.Join(eso_home, "live"))
-	if !ok || err != nil {
-		return fmt.Errorf("%q does not appear to be a valid ESO_HOME; please set the ESO_HOME environment variable and try again", eso_home)
+		viper.Set("eso_home", string(esoHome))
 	}
-
-	viper.Set("eso_home", string(eso_home))
 
 	return nil
 }
 
-func esoHome() string {
-	var eso_home string = viper.GetString("eso_home")
+func ESOHome() string {
+	return esoDir(viper.GetString("eso_home"))
+}
 
-	if eso_home == "" {
-		eso_home = "."
+func esoDir(dir string) string {
+	dir = filepath.Clean(strings.TrimSpace(dir))
+
+	if dir == "" || dir == "." || dir == "/" || dir == `\\` || dir == `C:\` {
+		return ""
 	}
 
-	return eso_home
+	// If the user entered a SavedVariables or AddOns directory, strip it off
+	for strings.Contains(dir, "live") {
+		dir = filepath.Dir(dir)
+	}
+
+	// Add the "Elder Scrolls Online" directory if it's not there
+	if !strings.Contains(dir, "Elder Scrolls Online") {
+		dir = filepath.Join(dir, "Elder Scrolls Online")
+	}
+
+	return dir
+}
+
+func checkESODir(dir string) bool {
+	dir = esoDir(dir)
+
+	ok, err := afero.DirExists(AppFs, filepath.Join(dir, "live"))
+	if err != nil {
+		return false
+	}
+
+	return ok
 }

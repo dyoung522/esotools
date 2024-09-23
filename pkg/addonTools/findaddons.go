@@ -16,12 +16,7 @@ func FindAddOns(AppFs afero.Fs) ([]esoAddOns.AddOnDefinition, error) {
 	var addons []esoAddOns.AddOnDefinition
 
 	verbosity := viper.GetInt("verbosity")
-	eso_home := string(viper.GetString("eso_home"))
 	addonsPath := AddOnsPath()
-
-	if ok, err := afero.DirExists(AppFs, addonsPath); !ok || err != nil {
-		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", eso_home)
-	}
 
 	if verbosity >= 2 {
 		fmt.Println("Searching", addonsPath)

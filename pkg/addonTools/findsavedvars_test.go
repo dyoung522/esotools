@@ -13,12 +13,12 @@ import (
 func TestFindSavedVars(t *testing.T) {
 	// Create a new in-memory file system
 	var fs = afero.NewMemMapFs()
-	viper.Set("eso_home", "/tmp/eso")
+	viper.Set("eso_home", "/tmp/eso/Elder Scrolls Online")
 
 	// Populate the file system with some addon files
-	_ = fs.MkdirAll("/tmp/eso/live/SavedVariables", 0755)
-	_ = afero.WriteFile(fs, "/tmp/eso/live/SavedVariables/MyAddon1.lua", []byte("MyAddon1"), 0644)
-	_ = afero.WriteFile(fs, "/tmp/eso/live/SavedVariables/MyAddon2.lua", []byte("MyAddon2"), 0644)
+	_ = fs.MkdirAll("/tmp/eso/Elder Scrolls Online/live/SavedVariables", 0755)
+	_ = afero.WriteFile(fs, "/tmp/eso/Elder Scrolls Online/live/SavedVariables/MyAddon1.lua", []byte("MyAddon1"), 0644)
+	_ = afero.WriteFile(fs, "/tmp/eso/Elder Scrolls Online/live/SavedVariables/MyAddon2.lua", []byte("MyAddon2"), 0644)
 
 	// Call the function we're testing
 	savedVarsList, err := addOnTools.FindSavedVars(fs)

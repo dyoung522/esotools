@@ -8,14 +8,14 @@ import (
 )
 
 func DocumentsDir() (string, error) {
-	eso_home, err := os.UserHomeDir()
+	home, err := os.UserHomeDir()
 	if err != nil {
 		panic(err)
 	}
 
-	if eso_home == "" {
+	if home == "" {
 		return "", nil
 	}
 
-	return filepath.Join(eso_home, "Documents"), nil
+	return filepath.Join(home, "Documents"), nil
 }

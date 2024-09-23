@@ -1,4 +1,4 @@
-package addonTools
+package addOnTools
 
 import (
 	"fmt"
@@ -6,23 +6,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/dyoung522/esotools/pkg/esoAddOnFiles"
-	"github.com/dyoung522/esotools/pkg/esoAddOns"
+	"github.com/dyoung522/esotools/lib/esoAddOns"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
 
-func FindAddOns(AppFs afero.Fs) ([]esoAddOnFiles.AddOnDefinition, error) {
+func FindAddOns(AppFs afero.Fs) ([]esoAddOns.AddOnDefinition, error) {
 	var err error
-	var addons []esoAddOnFiles.AddOnDefinition
+	var addons []esoAddOns.AddOnDefinition
 
 	verbosity := viper.GetInt("verbosity")
-	eso_home := string(viper.GetString("eso_home"))
 	addonsPath := AddOnsPath()
-
-	if ok, err := afero.DirExists(AppFs, addonsPath); !ok || err != nil {
-		return nil, fmt.Errorf("%+q is not a valid ESO HOME directory", eso_home)
-	}
 
 	if verbosity >= 2 {
 		fmt.Println("Searching", addonsPath)
@@ -40,7 +34,7 @@ func FindAddOns(AppFs afero.Fs) ([]esoAddOnFiles.AddOnDefinition, error) {
 	return addons, err
 }
 
-func getAddOnList(path string, addons *[]esoAddOnFiles.AddOnDefinition, err error) error {
+func getAddOnList(path string, addons *[]esoAddOns.AddOnDefinition, err error) error {
 	var verbosity = viper.GetInt("verbosity")
 
 	if err != nil {
@@ -51,7 +45,7 @@ func getAddOnList(path string, addons *[]esoAddOnFiles.AddOnDefinition, err erro
 		fmt.Println("Searching", path)
 	}
 
-	md := esoAddOnFiles.AddOnDefinition{
+	md := esoAddOns.AddOnDefinition{
 		Name: filepath.Base(path),
 		Dir:  strings.TrimPrefix(filepath.Dir(path), AddOnsPath()),
 	}

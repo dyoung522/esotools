@@ -21,20 +21,15 @@ go install github.com/dyoung522/esotools@latest
 
 Otherwise, you can download the pre-compiled binaries from the Assests section in our [GitHub Releases](https://github.com/dyoung522/esotools/releases)
 
-- `esotools.exe` is the Windows binary
-- `esotools-linux` is the Linux binary
-- `esotools-osx` is the MacOS binary
-
 Feel free to rename them to `esotools` on your particular system for ease of use.
 
 ## Configuration
 
-Before you can use the tool, it needs to know the location where your Local ESO game configuration files are installed.
-This is usually in `%Documents%\Elder Scrolls Online` on Windows or `${HOME}/Documents/Elder Scrolls Online` on MacOS.
+Upon launch, the tool will attempt to auto-discover your ESO_HOME directory. If it cannot, it will prompt you to enter it manually.
 
-### Configuration File
+This is usually in `%Documents%\Elder Scrolls Online` on Windows or `${HOME}/Documents/Elder Scrolls Online` on MacOS / Linux.
 
-The best way to do this is to create an `.esotools.yaml` file in your HOME directory with the following contents:
+Optionally, you can specify the `--esohome` flag, set an `ESO_HOME` environment variable, or create a `.esotools` file in your HOME directory with the following contents:
 
 ```yaml
 eso_home: "/<your-home-directory>/Documents/Elder Scrolls Online"
@@ -43,23 +38,6 @@ eso_home: "/<your-home-directory>/Documents/Elder Scrolls Online"
 The advantage to this method is that you only need to do this once, and then can simply run `esotools` without supplying any additional information.
 
 **_PLEASE NOTE: DO NOT include the `live` folder as part of your path._**
-
-### Other Configuration Options
-
-Optionally, you can also use the command line option `--esohome` (or `-H` for short), or set an `ESO_HOME` environment variable.
-Using either of these options will override anything in your `.esotools.yaml` file (if it exists).
-
-#### command-line option
-
-```sh
-esotools -H "${HOME}/Documents/Elder Scrolls Online"
-```
-
-#### environment variable
-
-```sh
-ESO_HOME="${HOME}/Documents/Game Files/Elder Scrolls Online" esotools
-```
 
 ## Usage
 

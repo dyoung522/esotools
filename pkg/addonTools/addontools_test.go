@@ -1,43 +1,45 @@
-package addonTools_test
+package addOnTools_test
 
 import (
+	"path/filepath"
 	"testing"
 
-	"github.com/dyoung522/esotools/pkg/addonTools"
-	. "github.com/onsi/gomega"
+	"github.com/dyoung522/esotools/pkg/addOnTools"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestAddOnsPath_WithValidESOHome(t *testing.T) {
 	// Arrange
-	expected := "/home/user/eso/live/AddOns"
+	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/AddOns")
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
-	actual := addonTools.AddOnsPath()
+	actual := addOnTools.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
 }
 
 func TestAddOnsPath_WithEmptyESOHome(t *testing.T) {
-	g := NewWithT(t)
-
 	// Arrange
+	expected := filepath.Clean("./live/AddOns")
 	viper.Set("eso_home", "")
 
+	// Act
+	actual := addOnTools.AddOnsPath()
+
 	// Assert
-	g.Expect(func() { addonTools.AddOnsPath() }).To(PanicWith("ESO_HOME environment variable not set"))
+	assert.Equal(t, expected, actual)
 }
 
 func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
 	// Arrange
-	expected := "/home/user/path with spaces/live/AddOns"
+	expected := filepath.Clean("/home/user/path with spaces/Elder Scrolls Online/live/AddOns")
 	viper.Set("eso_home", "/home/user/path with spaces")
 
 	// Act
-	actual := addonTools.AddOnsPath()
+	actual := addOnTools.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -45,13 +47,13 @@ func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
 
 func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 	// Arrange
-	path := "/home/user/path-with-sp3c14l-char$"
+	path := filepath.Clean("/home/user/path-with-sp3c14l-char$")
 	viper.Set("eso_home", path)
 
-	expected := path + "/live/AddOns"
+	expected := filepath.Join(path, "/Elder Scrolls Online/live/AddOns")
 
 	// Act
-	actual := addonTools.AddOnsPath()
+	actual := addOnTools.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -59,24 +61,26 @@ func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 
 func TestSavedVariablesPath_WithValidESOHome(t *testing.T) {
 	// Arrange
-	expected := "/home/user/eso/live/SavedVariables"
+	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/SavedVariables")
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
-	actual := addonTools.SavedVariablesPath()
+	actual := addOnTools.SavedVariablesPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
 }
 
 func TestSavedVariablesPath_WithEmptyESOHome(t *testing.T) {
-	g := NewWithT(t)
-
 	// Arrange
+	expected := filepath.Clean("./live/SavedVariables")
 	viper.Set("eso_home", "")
 
+	// Act
+	actual := addOnTools.SavedVariablesPath()
+
 	// Assert
-	g.Expect(func() { addonTools.SavedVariablesPath() }).To(PanicWith("ESO_HOME environment variable not set"))
+	assert.Equal(t, expected, actual)
 }
 
 func TestPluralize_WordEndingInS(t *testing.T) {
@@ -86,7 +90,7 @@ func TestPluralize_WordEndingInS(t *testing.T) {
 	count := 2
 	expected := "buses"
 
-	actual := addonTools.Pluralize(word, count)
+	actual := addOnTools.Pluralize(word, count)
 
 	assert.Equal(expected, actual, "Expected %q, but got %q", expected, actual)
 }
@@ -98,7 +102,7 @@ func TestPluralize_WordEndingInX(t *testing.T) {
 	count := 2
 	expected := "boxes"
 
-	actual := addonTools.Pluralize(word, count)
+	actual := addOnTools.Pluralize(word, count)
 
 	assert.Equal(expected, actual, "Expected %q, but got %q", expected, actual)
 }
@@ -145,7 +149,7 @@ func TestPluralize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
-			actual := addonTools.Pluralize(tt.word, tt.count)
+			actual := addOnTools.Pluralize(tt.word, tt.count)
 			assert.Equal(tt.expect, actual, "Expected %q, but got %q", tt.expect, actual)
 		})
 	}

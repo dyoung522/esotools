@@ -1,11 +1,9 @@
-package esoAddOnFiles
+package esoAddOns
 
 import (
 	"fmt"
 	"path/filepath"
 	"strings"
-
-	"github.com/dyoung522/esotools/pkg/esoAddOns"
 )
 
 // AddOnDefinition represents a single ESO add-on definition.
@@ -29,5 +27,5 @@ func (AD AddOnDefinition) Path() string {
 // Key returns the unique identifier of the add-on.
 // It trims the .txt extension from the name and converts it to a key using the ToKey function from the esoAddOns package.
 func (AD AddOnDefinition) Key() string {
-	return esoAddOns.ToKey(strings.TrimSuffix(AD.Name, ".txt"))
+	return ToKey(strings.TrimSuffix(AD.Name, ".txt"))
 }

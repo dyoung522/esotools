@@ -1,9 +1,9 @@
-package addOnTools_test
+package eso_test
 
 import (
 	"testing"
 
-	"github.com/dyoung522/esotools/pkg/addOnTools"
+	"github.com/dyoung522/esotools/lib/eso"
 	. "github.com/onsi/gomega"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
@@ -21,7 +21,7 @@ func TestFindSavedVars(t *testing.T) {
 	_ = afero.WriteFile(fs, "/tmp/eso/Elder Scrolls Online/live/SavedVariables/MyAddon2.lua", []byte("MyAddon2"), 0644)
 
 	// Call the function we're testing
-	savedVarsList, err := addOnTools.FindSavedVars(fs)
+	savedVarsList, err := eso.FindSavedVars(fs)
 
 	// Check that the function didn't return an error
 	assert.Nil(t, err, "expected no error")
@@ -31,7 +31,7 @@ func TestFindSavedVars(t *testing.T) {
 }
 
 func TestFindSavedVarsError(t *testing.T) {
-	var savedVarsList []addOnTools.SavedVars
+	var savedVarsList []eso.SavedVars
 
 	g := NewWithT(t)
 
@@ -43,7 +43,7 @@ func TestFindSavedVarsError(t *testing.T) {
 	_ = fs.MkdirAll("/tmp/eso/live/SavedVariables", 0755)
 
 	// Check that the function panics
-	g.Expect(func() { savedVarsList, _ = addOnTools.FindSavedVars(fs) }).NotTo(Panic())
+	g.Expect(func() { savedVarsList, _ = eso.FindSavedVars(fs) }).NotTo(Panic())
 
 	// Check that the function returned the expected message
 	assert.Len(t, savedVarsList, 0, "expected 0 SavedVariable files")

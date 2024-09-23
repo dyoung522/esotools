@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dyoung522/esotools/pkg/addOnTools"
+	"github.com/dyoung522/esotools/lib/eso"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +33,7 @@ func BackupSavedVars(AppFs afero.Fs) error {
 	archiveTime := fmt.Sprintf("%d%02d%02d%02d%02d%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 	archiveFileName := fmt.Sprintf("saved_variables_%s.zip", archiveTime)
 
-	saveVarFiles, err := addOnTools.FindSavedVars(AppFs)
+	saveVarFiles, err := eso.FindSavedVars(AppFs)
 	if err != nil {
 		fmt.Println(err)
 		return err

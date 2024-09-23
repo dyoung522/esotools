@@ -1,15 +1,15 @@
-package esoAddOns_test
+package eso_test
 
 import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dyoung522/esotools/lib/esoAddOns"
+	"github.com/dyoung522/esotools/lib/eso"
 )
 
 func TestAddOnDefinition_Key_TrimSuffix(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyAddon.txt",
 		Dir:  "path/to/addon",
 	}
@@ -26,7 +26,7 @@ func TestAddOnDefinition_Key_TrimSuffix(t *testing.T) {
 
 func TestAddOnDefinition_Key_TrimSuffix_NotEndingInTxt(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyAddon",
 		Dir:  "path/to/addon",
 	}
@@ -43,7 +43,7 @@ func TestAddOnDefinition_Key_TrimSuffix_NotEndingInTxt(t *testing.T) {
 
 func TestAddOnDefinition_Path(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyAddon.txt",
 		Dir:  "path/to/addon",
 	}
@@ -60,7 +60,7 @@ func TestAddOnDefinition_Path(t *testing.T) {
 
 func TestAddOnDefinition_Path_NameNotEndingInTxt(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyAddon.txt",
 		Dir:  "path/to/addon",
 	}
@@ -77,7 +77,7 @@ func TestAddOnDefinition_Path_NameNotEndingInTxt(t *testing.T) {
 
 func TestAddOnDefinition_Key_EmptyName(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "",
 		Dir:  "path/to/addon",
 	}
@@ -93,7 +93,7 @@ func TestAddOnDefinition_Key_EmptyName(t *testing.T) {
 
 func TestAddOnDefinition_Path_LeadingAndTrailingSlashes(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyAddon.txt",
 		Dir:  "/path/to/addon/",
 	}
@@ -110,7 +110,7 @@ func TestAddOnDefinition_Path_LeadingAndTrailingSlashes(t *testing.T) {
 
 func TestAddOnDefinition_Path_DirectoryWithSpaces(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyAddon.txt",
 		Dir:  "/path with spaces/to/addon",
 	}
@@ -127,7 +127,7 @@ func TestAddOnDefinition_Path_DirectoryWithSpaces(t *testing.T) {
 
 func TestAddOnDefinition_Key_UppercaseLetters(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyADDON.txt",
 		Dir:  "path/to/addon",
 	}
@@ -144,7 +144,7 @@ func TestAddOnDefinition_Key_UppercaseLetters(t *testing.T) {
 
 func TestAddOnDefinition_Key_SpecialCharacters(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "My@Addon#1.txt",
 		Dir:  "path/to/addon",
 	}
@@ -161,7 +161,7 @@ func TestAddOnDefinition_Key_SpecialCharacters(t *testing.T) {
 
 func TestAddOnDefinition_Key_NonASCIICharacters(t *testing.T) {
 	// Arrange
-	addOnDef := esoAddOns.AddOnDefinition{
+	addOnDef := eso.AddOnDefinition{
 		Name: "MyÁddón.txt",
 		Dir:  "path/to/addon",
 	}

@@ -1,4 +1,4 @@
-package esoAddOns
+package eso
 
 import (
 	"fmt"
@@ -25,7 +25,7 @@ func (AD AddOnDefinition) Path() string {
 }
 
 // Key returns the unique identifier of the add-on.
-// It trims the .txt extension from the name and converts it to a key using the ToKey function from the esoAddOns package.
+// It trims the .txt extension from the name and converts it to a key using the ToKey function from the eso package.
 func (AD AddOnDefinition) Key() string {
 	return ToKey(strings.TrimSuffix(AD.Name, ".txt"))
 }

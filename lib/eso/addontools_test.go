@@ -1,10 +1,10 @@
-package addOnTools_test
+package eso_test
 
 import (
 	"path/filepath"
 	"testing"
 
-	"github.com/dyoung522/esotools/pkg/addOnTools"
+	"github.com/dyoung522/esotools/lib/eso"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -15,7 +15,7 @@ func TestAddOnsPath_WithValidESOHome(t *testing.T) {
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
-	actual := addOnTools.AddOnsPath()
+	actual := eso.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -27,7 +27,7 @@ func TestAddOnsPath_WithEmptyESOHome(t *testing.T) {
 	viper.Set("eso_home", "")
 
 	// Act
-	actual := addOnTools.AddOnsPath()
+	actual := eso.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -39,7 +39,7 @@ func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
 	viper.Set("eso_home", "/home/user/path with spaces")
 
 	// Act
-	actual := addOnTools.AddOnsPath()
+	actual := eso.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -53,7 +53,7 @@ func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 	expected := filepath.Join(path, "/Elder Scrolls Online/live/AddOns")
 
 	// Act
-	actual := addOnTools.AddOnsPath()
+	actual := eso.AddOnsPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -65,7 +65,7 @@ func TestSavedVariablesPath_WithValidESOHome(t *testing.T) {
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
-	actual := addOnTools.SavedVariablesPath()
+	actual := eso.SavedVariablesPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -77,7 +77,7 @@ func TestSavedVariablesPath_WithEmptyESOHome(t *testing.T) {
 	viper.Set("eso_home", "")
 
 	// Act
-	actual := addOnTools.SavedVariablesPath()
+	actual := eso.SavedVariablesPath()
 
 	// Assert
 	assert.Equal(t, expected, actual)
@@ -90,7 +90,7 @@ func TestPluralize_WordEndingInS(t *testing.T) {
 	count := 2
 	expected := "buses"
 
-	actual := addOnTools.Pluralize(word, count)
+	actual := eso.Pluralize(word, count)
 
 	assert.Equal(expected, actual, "Expected %q, but got %q", expected, actual)
 }
@@ -102,7 +102,7 @@ func TestPluralize_WordEndingInX(t *testing.T) {
 	count := 2
 	expected := "boxes"
 
-	actual := addOnTools.Pluralize(word, count)
+	actual := eso.Pluralize(word, count)
 
 	assert.Equal(expected, actual, "Expected %q, but got %q", expected, actual)
 }
@@ -149,7 +149,7 @@ func TestPluralize(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
-			actual := addOnTools.Pluralize(tt.word, tt.count)
+			actual := eso.Pluralize(tt.word, tt.count)
 			assert.Equal(tt.expect, actual, "Expected %q, but got %q", tt.expect, actual)
 		})
 	}

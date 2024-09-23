@@ -1,4 +1,4 @@
-package esoAddOns
+package eso
 
 import (
 	"encoding/json"

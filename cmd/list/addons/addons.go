@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/dyoung522/esotools/pkg/addOnTools"
+	"github.com/dyoung522/esotools/lib/eso"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -28,7 +28,7 @@ By default, this will print out a simple list with only one AddOn per line. Howe
 `,
 
 	Run: func(cmd *cobra.Command, args []string) {
-		addons, errs := addOnTools.Run()
+		addons, errs := eso.Run()
 
 		if len(errs) > 0 {
 			for _, e := range errs {

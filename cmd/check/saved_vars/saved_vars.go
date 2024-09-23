@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	backupCmd "github.com/dyoung522/esotools/cmd/backup/saved_vars"
-	"github.com/dyoung522/esotools/pkg/addOnTools"
+	"github.com/dyoung522/esotools/lib/eso"
 	"github.com/pterm/pterm"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -39,9 +39,9 @@ var CheckSavedVarsCmd = &cobra.Command{
 func execute(cmd *cobra.Command, args []string) {
 	var verbosity = viper.GetInt("verbosity")
 	var AppFs = afero.NewOsFs()
-	var extraneousSavedVars []addOnTools.SavedVars
+	var extraneousSavedVars []eso.SavedVars
 
-	addons, errs := addOnTools.Run()
+	addons, errs := eso.Run()
 	if len(errs) > 0 {
 		for _, e := range errs {
 			fmt.Println(e)
@@ -53,7 +53,7 @@ func execute(cmd *cobra.Command, args []string) {
 		cmd.Println("Checking SavedVariables")
 	}
 
-	savedVarFiles, err := addOnTools.FindSavedVars(AppFs)
+	savedVarFiles, err := eso.FindSavedVars(AppFs)
 	if err != nil {
 		cmd.Println(err)
 		os.Exit(2)
@@ -75,7 +75,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var numberOfExtraneousSavedVars = len(extraneousSavedVars)
 
 	if numberOfExtraneousSavedVars > 0 {
-		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, addOnTools.Pluralize("file", numberOfExtraneousSavedVars))
+		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, eso.Pluralize("file", numberOfExtraneousSavedVars))
 
 		if verbosity >= 1 || flags.clean {
 			for _, savedVar := range extraneousSavedVars {

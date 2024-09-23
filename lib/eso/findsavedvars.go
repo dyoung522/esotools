@@ -1,4 +1,4 @@
-package addOnTools
+package eso
 
 import (
 	"fmt"

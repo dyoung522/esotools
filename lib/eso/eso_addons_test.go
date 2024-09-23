@@ -1,10 +1,10 @@
-package esoAddOns_test
+package eso_test
 
 import (
 	"fmt"
 	"testing"
 
-	"github.com/dyoung522/esotools/lib/esoAddOns"
+	"github.com/dyoung522/esotools/lib/eso"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 )
@@ -14,16 +14,16 @@ func init() {
 }
 
 func TestPrint_NoAddOns(t *testing.T) {
-	addons := esoAddOns.AddOns{}
+	addons := eso.AddOns{}
 	output := addons.Print("markdown")
 	expected := "Total: 0 AddOns"
 	assert.Equal(t, expected, output)
 }
 
 func TestPrint_MarkdownFormat(t *testing.T) {
-	addons := esoAddOns.AddOns{
-		"addon1": esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
-		"addon2": esoAddOns.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
+	addons := eso.AddOns{
+		"addon1": eso.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
+		"addon2": eso.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
 	}
 	output := addons.Print("markdown")
 	expected := "## Addon One (v1.0) by Author One\n\n## Addon Two (v2.0) by Author Two\n\nTotal: 2 AddOns"
@@ -31,9 +31,9 @@ func TestPrint_MarkdownFormat(t *testing.T) {
 }
 
 func TestPrint_HeaderFormat(t *testing.T) {
-	addons := esoAddOns.AddOns{
-		"addon1": esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
-		"addon2": esoAddOns.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
+	addons := eso.AddOns{
+		"addon1": eso.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
+		"addon2": eso.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
 	}
 	output := addons.Print("header")
 	expected := "## Title: Addon One\n## Description: \n## Author: Author One\n## Version: 1.0\n## AddOnVersion: \n## APIVersion: \n## SavedVariables: \n## DependsOn: \n## OptionalDependsOn: \n## IsDependency: false\n## IsLibrary: false\n\n## Title: Addon Two\n## Description: \n## Author: Author Two\n## Version: 2.0\n## AddOnVersion: \n## APIVersion: \n## SavedVariables: \n## DependsOn: \n## OptionalDependsOn: \n## IsDependency: false\n## IsLibrary: false\n\nTotal: 2 AddOns"
@@ -41,10 +41,10 @@ func TestPrint_HeaderFormat(t *testing.T) {
 }
 
 func TestPrint_JsonFormat(t *testing.T) {
-	var addon1, addon2 esoAddOns.AddOn
+	var addon1, addon2 eso.AddOn
 
-	addon1, _ = esoAddOns.NewAddOn("addon1")
-	addon2, _ = esoAddOns.NewAddOn("addon2")
+	addon1, _ = eso.NewAddOn("addon1")
+	addon2, _ = eso.NewAddOn("addon2")
 
 	addon1.Title = "Addon One"
 	addon1.Author = "Author One"
@@ -54,16 +54,16 @@ func TestPrint_JsonFormat(t *testing.T) {
 	addon2.Author = "Author Two"
 	addon2.Version = "2.0"
 
-	addons := esoAddOns.AddOns{"addon1": addon1, "addon2": addon2}
+	addons := eso.AddOns{"addon1": addon1, "addon2": addon2}
 	output := addons.Print("json")
 	expected := `[{"Title":"Addon One","Author":"Author One","Contributors":"","Version":"1.0","Description":"","AddOnVersion":"","APIVersion":"","SavedVariables":null,"DependsOn":null,"OptionalDependsOn":null},{"Title":"Addon Two","Author":"Author Two","Contributors":"","Version":"2.0","Description":"","AddOnVersion":"","APIVersion":"","SavedVariables":null,"DependsOn":null,"OptionalDependsOn":null}]`
 	assert.JSONEq(t, expected, output)
 }
 
 func TestPrint_OnelineMarkdownFormat(t *testing.T) {
-	addons := esoAddOns.AddOns{
-		"addon1": esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
-		"addon2": esoAddOns.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
+	addons := eso.AddOns{
+		"addon1": eso.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
+		"addon2": eso.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
 	}
 	output := addons.Print("oneline")
 	expected := "- Addon One (v1.0) by Author One\n- Addon Two (v2.0) by Author Two\nTotal: 2 AddOns"
@@ -71,9 +71,9 @@ func TestPrint_OnelineMarkdownFormat(t *testing.T) {
 }
 
 func TestPrint_WithDependenciesAndLibraries(t *testing.T) {
-	addons := esoAddOns.AddOns{
-		"addon1": esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
-		"addon2": esoAddOns.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
+	addons := eso.AddOns{
+		"addon1": eso.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"},
+		"addon2": eso.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"},
 	}
 	addon1 := addons["addon1"]
 	addon2 := addons["addon2"]
@@ -88,15 +88,15 @@ func TestPrint_WithDependenciesAndLibraries(t *testing.T) {
 }
 
 func TestPrint_WithoutDependenciesAndLibraries(t *testing.T) {
-	var addon1, addon2 esoAddOns.AddOn
+	var addon1, addon2 eso.AddOn
 
-	addon1 = esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"}
-	addon2 = esoAddOns.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"}
+	addon1 = eso.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"}
+	addon2 = eso.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"}
 
 	addon1.SetDependency(true)
 	addon2.SetLibrary(true)
 
-	addons := esoAddOns.AddOns{"addon1": addon1, "addon2": addon2}
+	addons := eso.AddOns{"addon1": addon1, "addon2": addon2}
 
 	viper.Set("noDeps", true)
 	viper.Set("noLibs", true)
@@ -107,14 +107,14 @@ func TestPrint_WithoutDependenciesAndLibraries(t *testing.T) {
 }
 
 func TestPrint_WithSubmodules(t *testing.T) {
-	var addon1, addon2 esoAddOns.AddOn
+	var addon1, addon2 eso.AddOn
 
-	addon1 = esoAddOns.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"}
-	addon2 = esoAddOns.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"}
+	addon1 = eso.AddOn{Title: "Addon One", Author: "Author One", Version: "1.0"}
+	addon2 = eso.AddOn{Title: "Addon Two", Author: "Author Two", Version: "2.0"}
 
 	addon1.SetDir("path/to/submodule")
 
-	addons := esoAddOns.AddOns{"addon1": addon1, "addon2": addon2}
+	addons := eso.AddOns{"addon1": addon1, "addon2": addon2}
 
 	output := addons.Print("markdown")
 	expected := "## Addon Two (v2.0) by Author Two\n\nTotal: 1 AddOns"
@@ -122,13 +122,13 @@ func TestPrint_WithSubmodules(t *testing.T) {
 }
 
 func TestValidate_WithValidAddon(t *testing.T) {
-	addon1, _ := esoAddOns.NewAddOn("ValidAddon")
+	addon1, _ := eso.NewAddOn("ValidAddon")
 
 	assert.True(t, addon1.Validate())
 }
 
 func TestValidateTitle_MissingTitle(t *testing.T) {
-	addon1, _ := esoAddOns.NewAddOn("InvalidTitle")
+	addon1, _ := eso.NewAddOn("InvalidTitle")
 	addon1.Author = "Author One"
 	addon1.Version = "1.0"
 
@@ -139,7 +139,7 @@ func TestValidateTitle_MissingTitle(t *testing.T) {
 }
 
 func TestValidateTitle_MissingAuthor(t *testing.T) {
-	addon1, _ := esoAddOns.NewAddOn("InvalidAuthor")
+	addon1, _ := eso.NewAddOn("InvalidAuthor")
 	addon1.Title = "Invalid Author"
 	addon1.Version = "1.0"
 
@@ -149,7 +149,7 @@ func TestValidateTitle_MissingAuthor(t *testing.T) {
 }
 
 func TestValidateTitle_MissingVersion(t *testing.T) {
-	addon1, _ := esoAddOns.NewAddOn("InvalidVersion")
+	addon1, _ := eso.NewAddOn("InvalidVersion")
 	addon1.Title = "Invalid Version"
 	addon1.Author = "Author One"
 
@@ -161,7 +161,7 @@ func TestValidateTitle_MissingVersion(t *testing.T) {
 func TestValidateTitle_InvalidAddon(t *testing.T) {
 	var errs []error
 
-	addon1, _ := esoAddOns.NewAddOn("")
+	addon1, _ := eso.NewAddOn("")
 
 	expectedErrors := append(errs, fmt.Errorf("'Title' is required"))
 
@@ -206,7 +206,7 @@ func TestStripESOColorCodes(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			assert := assert.New(t)
-			actual := esoAddOns.StripESOColorCodes(tt.input)
+			actual := eso.StripESOColorCodes(tt.input)
 			assert.Equal(tt.expect, actual, "Expected %q, but got %q", tt.expect, actual)
 		})
 	}

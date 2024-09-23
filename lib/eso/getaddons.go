@@ -1,4 +1,4 @@
-package addOnTools
+package eso
 
 import (
 	"bufio"
@@ -10,14 +10,13 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/dyoung522/esotools/lib/esoAddOns"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
 
-func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
+func GetAddOns(AppFs afero.Fs) (AddOns, []error) {
 	var errs = []error{}
-	var addons = esoAddOns.AddOns{}
+	var addons = AddOns{}
 	var verbosity = viper.GetInt("verbosity")
 
 	addonlist, err := FindAddOns(AppFs)
@@ -42,7 +41,7 @@ func GetAddOns(AppFs afero.Fs) (esoAddOns.AddOns, []error) {
 			continue
 		}
 
-		addon, err := esoAddOns.NewAddOn(addonFile.Key())
+		addon, err := NewAddOn(addonFile.Key())
 		if err != nil {
 			errs = append(errs, fmt.Errorf("could not create addon: %w", err))
 			continue
@@ -146,7 +145,7 @@ func DependencyName(input string) []string {
 	return strings.Split(strings.TrimRight(input, "\r\n"), ">=")
 }
 
-func markDependencies(addons *esoAddOns.AddOns) {
+func markDependencies(addons *AddOns) {
 	for key, addon := range *addons {
 		if len(addon.DependsOn) == 0 {
 			continue
@@ -162,7 +161,7 @@ func markDependencies(addons *esoAddOns.AddOns) {
 			dependencyName := DependencyName(dependency)[0]
 
 			// Skip self-references
-			if dependencyName == "" || esoAddOns.ToKey(dependencyName) == key {
+			if dependencyName == "" || ToKey(dependencyName) == key {
 				continue
 			}
 

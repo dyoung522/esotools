@@ -1,12 +1,11 @@
-package addOnTools
+package eso
 
 import (
 	"fmt"
 	"path/filepath"
 	"strings"
 
-	"github.com/dyoung522/esotools/lib/esoAddOns"
-	"github.com/dyoung522/esotools/pkg/osTools"
+	"github.com/dyoung522/esotools/pkg/ostools"
 	"github.com/gertd/go-pluralize"
 	"github.com/pterm/pterm"
 	"github.com/spf13/afero"
@@ -15,7 +14,7 @@ import (
 
 var AppFs = afero.NewReadOnlyFs(afero.NewOsFs())
 
-func Run() (esoAddOns.AddOns, []error) {
+func Run() (AddOns, []error) {
 	var verbosity = viper.GetInt("verbosity")
 
 	if verbosity >= 1 {
@@ -52,7 +51,7 @@ func ValidateESOHOME() error {
 			fmt.Println(fmt.Errorf("%q does not appear to be a valid ESO directory, attempting auto-detect", esoHome))
 		}
 
-		documentsDir, err := osTools.DocumentsDir()
+		documentsDir, err := ostools.DocumentsDir()
 		if err != nil {
 			return err
 		}

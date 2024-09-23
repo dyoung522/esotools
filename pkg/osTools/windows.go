@@ -1,6 +1,6 @@
 //go:build windows
 
-package osTools
+package ostools
 
 import (
 	"path/filepath"

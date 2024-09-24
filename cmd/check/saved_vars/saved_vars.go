@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	backupCmd "github.com/dyoung522/esotools/cmd/backup/saved_vars"
+	"github.com/dyoung522/esotools/eso"
 	"github.com/dyoung522/esotools/eso/addon"
 	"github.com/dyoung522/esotools/eso/savedvar"
 	"github.com/pterm/pterm"
@@ -76,7 +77,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var numberOfExtraneousSavedVars = len(extraneousSavedVars)
 
 	if numberOfExtraneousSavedVars > 0 {
-		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, addon.Pluralize("file", numberOfExtraneousSavedVars))
+		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, eso.Pluralize("file", numberOfExtraneousSavedVars))
 
 		if verbosity >= 1 || flags.clean {
 			for _, savedVar := range extraneousSavedVars {

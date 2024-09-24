@@ -5,7 +5,7 @@ import (
 	"io/fs"
 	"path/filepath"
 
-	"github.com/dyoung522/esotools/eso/addon"
+	"github.com/dyoung522/esotools/eso"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
@@ -57,5 +57,5 @@ func Find(AppFs afero.Fs) ([]SavedVar, error) {
 }
 
 func Path() string {
-	return filepath.Join(filepath.Clean(addon.ESOHome()), "live", "SavedVariables")
+	return filepath.Join(filepath.Clean(eso.Home()), "live", "SavedVariables")
 }

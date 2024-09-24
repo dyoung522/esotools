@@ -14,43 +14,43 @@ import (
 
 var AppFs afero.Fs
 
-func TestAddOnsPath_WithValidESOHome(t *testing.T) {
+func TestPath_WithValidESOHome(t *testing.T) {
 	// Arrange
 	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/AddOns")
 	viper.Set("eso_home", "/home/user/eso")
 
 	// Act
-	actual := addon.AddOnsPath()
+	actual := addon.Path()
 
 	// Assert
 	assert.Equal(t, expected, actual)
 }
 
-func TestAddOnsPath_WithEmptyESOHome(t *testing.T) {
+func TestPath_WithEmptyESOHome(t *testing.T) {
 	// Arrange
 	expected := filepath.Clean("./live/AddOns")
 	viper.Set("eso_home", "")
 
 	// Act
-	actual := addon.AddOnsPath()
+	actual := addon.Path()
 
 	// Assert
 	assert.Equal(t, expected, actual)
 }
 
-func TestAddOnsPath_WithESOHomeWithSpaces(t *testing.T) {
+func TestPath_WithSpaces(t *testing.T) {
 	// Arrange
 	expected := filepath.Clean("/home/user/path with spaces/Elder Scrolls Online/live/AddOns")
 	viper.Set("eso_home", "/home/user/path with spaces")
 
 	// Act
-	actual := addon.AddOnsPath()
+	actual := addon.Path()
 
 	// Assert
 	assert.Equal(t, expected, actual)
 }
 
-func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
+func TestPath_WithSpecialCharacters(t *testing.T) {
 	// Arrange
 	path := filepath.Clean("/home/user/path-with-sp3c14l-char$")
 	viper.Set("eso_home", path)
@@ -58,148 +58,10 @@ func TestAddOnsPath_WithESOHomeWithSpecialCharacters(t *testing.T) {
 	expected := filepath.Join(path, "/Elder Scrolls Online/live/AddOns")
 
 	// Act
-	actual := addon.AddOnsPath()
+	actual := addon.Path()
 
 	// Assert
 	assert.Equal(t, expected, actual)
-}
-
-func TestSavedVariablesPath_WithValidESOHome(t *testing.T) {
-	// Arrange
-	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/SavedVariables")
-	viper.Set("eso_home", "/home/user/eso")
-
-	// Act
-	actual := addon.SavedVariablesPath()
-
-	// Assert
-	assert.Equal(t, expected, actual)
-}
-
-func TestSavedVariablesPath_WithEmptyESOHome(t *testing.T) {
-	// Arrange
-	expected := filepath.Clean("./live/SavedVariables")
-	viper.Set("eso_home", "")
-
-	// Act
-	actual := addon.SavedVariablesPath()
-
-	// Assert
-	assert.Equal(t, expected, actual)
-}
-
-func TestPluralize_WordEndingInS(t *testing.T) {
-	assert := assert.New(t)
-
-	word := "bus"
-	count := 2
-	expected := "buses"
-
-	actual := addon.Pluralize(word, count)
-
-	assert.Equal(expected, actual, "Expected %q, but got %q", expected, actual)
-}
-
-func TestPluralize_WordEndingInX(t *testing.T) {
-	assert := assert.New(t)
-
-	word := "box"
-	count := 2
-	expected := "boxes"
-
-	actual := addon.Pluralize(word, count)
-
-	assert.Equal(expected, actual, "Expected %q, but got %q", expected, actual)
-}
-
-func TestPluralize(t *testing.T) {
-	tests := []struct {
-		name   string
-		word   string
-		count  int
-		expect string
-	}{
-		{
-			name:   "singular word",
-			word:   "box",
-			count:  1,
-			expect: "box",
-		},
-		{
-			name:   "plural word ending in 's'",
-			word:   "bus",
-			count:  2,
-			expect: "buses",
-		},
-		{
-			name:   "plural word ending in 'y' proceeded by a consonant",
-			word:   "fly",
-			count:  2,
-			expect: "flies",
-		},
-		{
-			name:   "plural word ending in 'y' and proceeded by a vowel",
-			word:   "flay",
-			count:  2,
-			expect: "flays",
-		},
-		{
-			name:   "plural word ending in 'ch'",
-			word:   "match",
-			count:  2,
-			expect: "matches",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert := assert.New(t)
-			actual := addon.Pluralize(tt.word, tt.count)
-			assert.Equal(tt.expect, actual, "Expected %q, but got %q", tt.expect, actual)
-		})
-	}
-}
-
-func TestStripESOColorCodes(t *testing.T) {
-	tests := []struct {
-		name   string
-		input  string
-		expect string
-	}{
-		{
-			name:   "no color codes",
-			input:  "Test String",
-			expect: "Test String",
-		},
-		{
-			name:   "single color code",
-			input:  "|c121212Test|r String",
-			expect: "Test String",
-		},
-		{
-			name:   "multiple color codes",
-			input:  "|c121212Test|r String |c323232Multiple|r Codes",
-			expect: "Test String Multiple Codes",
-		},
-		{
-			name:   "color codes at end of string",
-			input:  "|c121212Test|r String |c323232Multiple|r",
-			expect: "Test String Multiple",
-		},
-		{
-			name:   "invalid color codes",
-			input:  "|c00FF00Test |cFFFF00String|r",
-			expect: "Test String",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			assert := assert.New(t)
-			actual := addon.StripESOColorCodes(tt.input)
-			assert.Equal(tt.expect, actual, "Expected %q, but got %q", tt.expect, actual)
-		})
-	}
 }
 
 func TestFind(t *testing.T) {
@@ -285,7 +147,7 @@ func TestGetAddOns_MissingRequiredTitle(t *testing.T) {
 ## OptionalDependsOn:
 ## IsLibrary: false`)
 
-	err := afero.WriteFile(AppFs, filepath.Join(addon.AddOnsPath(), addonName, addonName+".txt"), data, 0644)
+	err := afero.WriteFile(AppFs, filepath.Join(addon.Path(), addonName, addonName+".txt"), data, 0644)
 	if err != nil {
 		t.Fatal(err)
 	}

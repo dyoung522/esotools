@@ -11,9 +11,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/dyoung522/esotools/ostools"
-	"github.com/gertd/go-pluralize"
-	"github.com/pterm/pterm"
+	"github.com/dyoung522/esotools/eso"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
@@ -30,91 +28,8 @@ func Run() (AddOns, []error) {
 	return Get(AppFs)
 }
 
-func AddOnsPath() string {
-	return filepath.Join(filepath.Clean(ESOHome()), "live", "AddOns")
-}
-
-func SavedVariablesPath() string {
-	return filepath.Join(filepath.Clean(ESOHome()), "live", "SavedVariables")
-}
-
-func Pluralize(s string, c int) string {
-	var pluralize = pluralize.NewClient()
-
-	if c == 1 {
-		return s
-	}
-
-	return pluralize.Plural(s)
-}
-
-func ValidateESOHOME() error {
-	verbosity := viper.GetInt("verbosity")
-	esoHome := ESOHome()
-
-	if !checkESODir(esoHome) {
-		if esoHome != "" {
-			fmt.Println(fmt.Errorf("%q does not appear to be a valid ESO directory, attempting auto-detect", esoHome))
-		}
-
-		documentsDir, err := ostools.DocumentsDir()
-		if err != nil {
-			return err
-		}
-
-		esoHome = esoDir(documentsDir)
-
-		for !checkESODir(esoHome) {
-			fmt.Println(fmt.Errorf("%q is not a valid ESO directory\n", esoHome))
-
-			esoHome, err = pterm.DefaultInteractiveTextInput.WithDefaultValue(documentsDir).Show(`Enter the directory where your "Elder Scrools Online" documents folder lives [CTRL+C to exit]`)
-			if err != nil {
-				return err
-			}
-
-			esoHome = esoDir(esoHome)
-		}
-
-		if verbosity >= 2 {
-			fmt.Printf("ESO_HOME set to %q\n", esoHome)
-		}
-
-		viper.Set("eso_home", string(esoHome))
-	}
-
-	return nil
-}
-
-func ESOHome() string {
-	return esoDir(viper.GetString("eso_home"))
-}
-
-// Helper function to convert a string to a key.
-// It replaces any spaces in the input string with hyphens.
-func ToKey(input string) string {
-	return strings.ReplaceAll(strings.TrimSpace(input), " ", "-")
-}
-
-func StripESOColorCodes(input string) string {
-	if !strings.Contains(input, `|c`) {
-		return input
-	}
-
-	colorRE := regexp.MustCompile(`\|c[[:xdigit:]]{6}`)
-	re := regexp.MustCompile(`\|c[[:xdigit:]]{6}(.*?)(?:\|r)`)
-
-	cleanString := re.ReplaceAllStringFunc(input, func(match string) string {
-		parts := re.FindStringSubmatch(match)
-		return parts[1]
-	})
-
-	// Strip out any remaining color codes from the clean title.
-	return colorRE.ReplaceAllString(cleanString, "")
-}
-
-// Removes version dependencies and returns the plain dependency name
-func DependencyName(input string) []string {
-	return strings.Split(strings.TrimRight(input, "\r\n"), ">=")
+func Path() string {
+	return filepath.Join(filepath.Clean(eso.Home()), "live", "AddOns")
 }
 
 func Find(AppFs afero.Fs) ([]AddOnFile, error) {
@@ -122,7 +37,7 @@ func Find(AppFs afero.Fs) ([]AddOnFile, error) {
 	var addons []AddOnFile
 
 	verbosity := viper.GetInt("verbosity")
-	addonsPath := AddOnsPath()
+	addonsPath := Path()
 
 	if verbosity >= 2 {
 		fmt.Println("Searching", addonsPath)
@@ -153,7 +68,7 @@ func List(path string, addons *[]AddOnFile, err error) error {
 
 	md := AddOnFile{
 		Name: filepath.Base(path),
-		Dir:  strings.TrimPrefix(filepath.Dir(path), AddOnsPath()),
+		Dir:  strings.TrimPrefix(filepath.Dir(path), Path()),
 	}
 
 	if filepath.Ext(md.Name) == ".txt" && ToKey(filepath.Base(md.Dir)) == md.Key() {
@@ -182,7 +97,7 @@ func Get(AppFs afero.Fs) (AddOns, []error) {
 	var re = regexp.MustCompile(`##\s+(?P<Type>\w+):\s(?P<Data>.*)\s*$`)
 
 	for _, addonFile := range addonlist {
-		file, err := AppFs.Open(filepath.Join(AddOnsPath(), addonFile.Path()))
+		file, err := AppFs.Open(filepath.Join(Path(), addonFile.Path()))
 		if err != nil {
 			errs = append(errs, fmt.Errorf("error opening file: %w", err))
 			continue
@@ -286,6 +201,12 @@ func Get(AppFs afero.Fs) (AddOns, []error) {
 	return addons, errs
 }
 
+// Helper function to convert a string to a key.
+// It replaces any spaces in the input string with hyphens.
+func ToKey(input string) string {
+	return strings.ReplaceAll(strings.TrimSpace(input), " ", "-")
+}
+
 /*
  * Private Functions
  */
@@ -310,7 +231,7 @@ func markDependencies(addons *AddOns) {
 		}
 
 		for _, dependency := range addon.DependsOn {
-			dependencyName := DependencyName(dependency)[0]
+			dependencyName := eso.DependencyName(dependency)[0]
 
 			// Skip self-references
 			if dependencyName == "" || ToKey(dependencyName) == key {
@@ -325,35 +246,4 @@ func markDependencies(addons *AddOns) {
 			}
 		}
 	}
-}
-
-func esoDir(dir string) string {
-	dir = filepath.Clean(strings.TrimSpace(dir))
-
-	if dir == "" || dir == "." || dir == "/" || dir == `\\` || dir == `C:\` {
-		return ""
-	}
-
-	// If the user entered a SavedVariables or AddOns directory, strip it off
-	for strings.Contains(dir, "live") {
-		dir = filepath.Dir(dir)
-	}
-
-	// Add the "Elder Scrolls Online" directory if it's not there
-	if !strings.Contains(dir, "Elder Scrolls Online") {
-		dir = filepath.Join(dir, "Elder Scrolls Online")
-	}
-
-	return dir
-}
-
-func checkESODir(dir string) bool {
-	dir = esoDir(dir)
-
-	ok, err := afero.DirExists(AppFs, filepath.Join(dir, "live"))
-	if err != nil {
-		return false
-	}
-
-	return ok
 }

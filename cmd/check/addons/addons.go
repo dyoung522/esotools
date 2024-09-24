@@ -6,7 +6,8 @@ import (
 	"sort"
 	"strings"
 
-	eso "github.com/dyoung522/esotools/eso/addon"
+	"github.com/dyoung522/esotools/eso"
+	"github.com/dyoung522/esotools/eso/addon"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -38,7 +39,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var dependencyArray = [2][]string{}
 	var verbosity = viper.GetInt("verbosity")
 
-	addons, errs := eso.Run()
+	addons, errs := addon.Run()
 
 	if len(errs) > 0 {
 		for _, e := range errs {
@@ -162,7 +163,7 @@ func printErrors(errors *map[string][]string, dependencyType string) {
 	}
 }
 
-func checkDependencies(addons *eso.AddOns, dependencies []string) []string {
+func checkDependencies(addons *addon.AddOns, dependencies []string) []string {
 	var missingDependencies = []string{}
 
 	for _, dependency := range dependencies {

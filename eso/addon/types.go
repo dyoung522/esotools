@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/dyoung522/esotools/eso"
 	"github.com/iancoleman/strcase"
 	"github.com/pterm/pterm"
 	"github.com/spf13/viper"
@@ -232,17 +233,17 @@ func (A *AddOn) Validate() bool {
 
 // CleanAuthor returns the Author without any ESO color codes
 func (A AddOn) CleanAuthor() string {
-	return StripESOColorCodes(A.Author)
+	return eso.StripESOColorCodes(A.Author)
 }
 
 // CleanTitle returns the Title without any ESO color codes
 func (A AddOn) CleanTitle() string {
-	return StripESOColorCodes(A.Title)
+	return eso.StripESOColorCodes(A.Title)
 }
 
 // CleanDescription returns the Author without any ESO color codes
 func (A AddOn) CleanDescription() string {
-	return StripESOColorCodes(A.Description)
+	return eso.StripESOColorCodes(A.Description)
 }
 
 /*

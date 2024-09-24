@@ -1,6 +1,7 @@
 package savedvar_test
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/dyoung522/esotools/eso/savedvar"
@@ -58,7 +59,7 @@ func TestPath(t *testing.T) {
 	assert.Equal(t, expected, actual, "expected path to SavedVariables")
 }
 
-func TestSavedVarPath(t *testing.T) {
+func TestSavedVarPathMethod(t *testing.T) {
 	var fs = afero.NewMemMapFs()
 	viper.Set("eso_home", "/tmp/eso/Elder Scrolls Online")
 
@@ -73,4 +74,28 @@ func TestSavedVarPath(t *testing.T) {
 	actual := sv.Path()
 
 	assert.Equal(t, expected, actual, "expected full path to SavedVariable file")
+}
+
+func TestPath_WithValidESOHome(t *testing.T) {
+	// Arrange
+	expected := filepath.Clean("/home/user/eso/Elder Scrolls Online/live/SavedVariables")
+	viper.Set("eso_home", "/home/user/eso")
+
+	// Act
+	actual := savedvar.Path()
+
+	// Assert
+	assert.Equal(t, expected, actual)
+}
+
+func TestPath_WithEmptyESOHome(t *testing.T) {
+	// Arrange
+	expected := filepath.Clean("./live/SavedVariables")
+	viper.Set("eso_home", "")
+
+	// Act
+	actual := savedvar.Path()
+
+	// Assert
+	assert.Equal(t, expected, actual)
 }

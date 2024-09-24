@@ -1,28 +1,36 @@
-package eso
+package savedvar
 
 import (
 	"fmt"
 	"io/fs"
 	"path/filepath"
 
+	"github.com/dyoung522/esotools/eso/addon"
 	"github.com/spf13/afero"
 	"github.com/spf13/viper"
 )
 
-type SavedVars struct {
+type SavedVar struct {
 	fs.FileInfo
 }
 
-func (sv SavedVars) FullPath() string {
-	return filepath.Join(SavedVariablesPath(), sv.Name())
+// New creates a new SavedVar from a fs.FileInfo
+func New(f fs.FileInfo) SavedVar {
+	return SavedVar{f}
 }
 
-func FindSavedVars(AppFs afero.Fs) ([]SavedVars, error) {
+// Path returns the full path to the SavedVar file
+func (sv SavedVar) Path() string {
+	return filepath.Join(Path(), sv.Name())
+}
+
+// Find returns a list of SavedVar files in the SavedVariables directory
+func Find(AppFs afero.Fs) ([]SavedVar, error) {
 	var err error
-	var savedVars []SavedVars
+	var savedVars []SavedVar
 
 	verbosity := viper.GetInt("verbosity")
-	savedVarsPath := SavedVariablesPath()
+	savedVarsPath := Path()
 
 	if ok, err := afero.DirExists(AppFs, savedVarsPath); !ok || err != nil {
 		return nil, fmt.Errorf("could not find any SavedVariables in %+q", savedVarsPath)
@@ -42,8 +50,12 @@ func FindSavedVars(AppFs afero.Fs) ([]SavedVars, error) {
 	}
 
 	for _, file := range files {
-		savedVars = append(savedVars, SavedVars{file})
+		savedVars = append(savedVars, SavedVar{file})
 	}
 
 	return savedVars, err
+}
+
+func Path() string {
+	return filepath.Join(filepath.Clean(addon.ESOHome()), "live", "SavedVariables")
 }

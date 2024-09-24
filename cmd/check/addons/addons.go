@@ -6,7 +6,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/dyoung522/esotools/lib/eso"
+	eso "github.com/dyoung522/esotools/eso/addon"
 	"github.com/pterm/pterm"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

@@ -5,6 +5,7 @@ default: check
 build: fmt clean test build-osx build-linux build-win
 
 clean: clean-bin tidy
+    go clean -i -cache -testcache
 
 ## Supporting Commands
 
@@ -24,12 +25,13 @@ check-all: fmt-all
     trunk check --all
 
 test:
-    go test ./pkg/... ./lib/...
+    go test ./eso/...
 
 clean-bin:
     rm -f bin/*
 
-update: tidy
+update: upgrade
+upgrade: tidy
     go get -u
     trunk upgrade
 

@@ -1,10 +1,9 @@
-package eso
+package addon
 
 import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 
@@ -39,6 +38,7 @@ func (AM addonMeta) String() string {
 	return fmt.Sprintf("[key: %s, dir: %s, dependency: %v, library: %v]", AM.key, AM.dir, AM.dependency, AM.library)
 }
 
+// AddOn represents an Elder Scrolls Online (ESO) add-on.
 type AddOn struct {
 	Title             string
 	Author            string
@@ -53,10 +53,10 @@ type AddOn struct {
 	meta              addonMeta
 }
 
-// NewAddOn creates a new instance of AddOn with the provided key.
+// New creates a new instance of AddOn with the provided key.
 // The key is converted to a standardized format using ToKey function.
 // If the key is empty, an error is returned.
-func NewAddOn(key string) (AddOn, error) {
+func New(key string) (AddOn, error) {
 	key = ToKey(key)
 
 	if key == "" {
@@ -362,25 +362,26 @@ func (A AddOns) Print(format string) string {
 	return strings.Join(append(output, blue.Sprintf("Total: %d AddOns", count)), "")
 }
 
-// Helper function to convert a string to a key.
-// It replaces any spaces in the input string with hyphens.
-func ToKey(input string) string {
-	return strings.ReplaceAll(strings.TrimSpace(input), " ", "-")
+// AddOnFile represents a single ESO add-on definition.
+type AddOnFile struct {
+	Name string // Name of the add-on file (without the .txt extension).
+	Dir  string // Directory where the add-on file is located.
 }
 
-func StripESOColorCodes(input string) string {
-	if !strings.Contains(input, `|c`) {
-		return input
-	}
+// String returns a string representation of the AddOnFile.
+// The format is "[ID: <key>, Name: <Name>, Dir: <filepath>]".
+func (AF AddOnFile) String() string {
+	return fmt.Sprintf("[ID: %s, name: %s, dir: %s]", AF.Key(), AF.Name, AF.Dir)
+}
 
-	colorRE := regexp.MustCompile(`\|c[[:xdigit:]]{6}`)
-	re := regexp.MustCompile(`\|c[[:xdigit:]]{6}(.*?)(?:\|r)`)
+// Path returns the full path to the add-on file.
+// It joins the directory (Dir) and the name (with .txt extension) of the add-on file.
+func (AF AddOnFile) Path() string {
+	return filepath.Join(AF.Dir, AF.Name)
+}
 
-	cleanString := re.ReplaceAllStringFunc(input, func(match string) string {
-		parts := re.FindStringSubmatch(match)
-		return parts[1]
-	})
-
-	// Strip out any remaining color codes from the clean title.
-	return colorRE.ReplaceAllString(cleanString, "")
+// Key returns the unique identifier of the add-on.
+// It trims the .txt extension from the name and converts it to a key using the ToKey function from the eso package.
+func (AF AddOnFile) Key() string {
+	return ToKey(strings.TrimSuffix(AF.Name, ".txt"))
 }

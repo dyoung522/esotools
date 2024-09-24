@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/dyoung522/esotools/lib/eso"
+	esoSavedVar "github.com/dyoung522/esotools/eso/savedvar"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,7 +33,7 @@ func BackupSavedVars(AppFs afero.Fs) error {
 	archiveTime := fmt.Sprintf("%d%02d%02d%02d%02d%02d", t.Year(), t.Month(), t.Day(), t.Hour(), t.Minute(), t.Second())
 	archiveFileName := fmt.Sprintf("saved_variables_%s.zip", archiveTime)
 
-	saveVarFiles, err := eso.FindSavedVars(AppFs)
+	saveVarFiles, err := esoSavedVar.Find(AppFs)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -54,18 +54,18 @@ func BackupSavedVars(AppFs afero.Fs) error {
 	zipWriter := zip.NewWriter(archiveFile)
 	defer zipWriter.Close()
 
-	for _, file := range saveVarFiles {
+	for _, sv := range saveVarFiles {
 		if verbosity >= 2 {
-			fmt.Printf("Adding %s to %s\n", file.Name(), archiveFileName)
+			fmt.Printf("Adding %s to %s\n", sv.Name(), archiveFileName)
 		}
 
-		fileData, err := afero.ReadFile(AppFs, file.FullPath())
+		fileData, err := afero.ReadFile(AppFs, sv.Path())
 		if err != nil {
 			fmt.Println(err)
 			return err
 		}
 
-		zipFile, err := zipWriter.Create(file.Name())
+		zipFile, err := zipWriter.Create(sv.Name())
 		if err != nil {
 			fmt.Println(err)
 			return err

@@ -6,7 +6,8 @@ import (
 	"strings"
 
 	backupCmd "github.com/dyoung522/esotools/cmd/backup/saved_vars"
-	"github.com/dyoung522/esotools/lib/eso"
+	"github.com/dyoung522/esotools/eso/addon"
+	"github.com/dyoung522/esotools/eso/savedvar"
 	"github.com/pterm/pterm"
 	"github.com/spf13/afero"
 	"github.com/spf13/cobra"
@@ -39,9 +40,9 @@ var CheckSavedVarsCmd = &cobra.Command{
 func execute(cmd *cobra.Command, args []string) {
 	var verbosity = viper.GetInt("verbosity")
 	var AppFs = afero.NewOsFs()
-	var extraneousSavedVars []eso.SavedVars
+	var extraneousSavedVars []savedvar.SavedVar
 
-	addons, errs := eso.Run()
+	addons, errs := addon.Run()
 	if len(errs) > 0 {
 		for _, e := range errs {
 			fmt.Println(e)
@@ -53,7 +54,7 @@ func execute(cmd *cobra.Command, args []string) {
 		cmd.Println("Checking SavedVariables")
 	}
 
-	savedVarFiles, err := eso.FindSavedVars(AppFs)
+	savedVarFiles, err := savedvar.Find(AppFs)
 	if err != nil {
 		cmd.Println(err)
 		os.Exit(2)
@@ -75,7 +76,7 @@ func execute(cmd *cobra.Command, args []string) {
 	var numberOfExtraneousSavedVars = len(extraneousSavedVars)
 
 	if numberOfExtraneousSavedVars > 0 {
-		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, eso.Pluralize("file", numberOfExtraneousSavedVars))
+		yellow.Printf("Found %d extraneous SavedVariable %s\n", numberOfExtraneousSavedVars, addon.Pluralize("file", numberOfExtraneousSavedVars))
 
 		if verbosity >= 1 || flags.clean {
 			for _, savedVar := range extraneousSavedVars {
@@ -108,10 +109,10 @@ func execute(cmd *cobra.Command, args []string) {
 
 				for _, savedVar := range extraneousSavedVars {
 					if flags.dryRun {
-						yellow.Printf("Would have removed: %q\n", savedVar.FullPath())
+						yellow.Printf("Would have removed: %q\n", savedVar.Path())
 					} else {
-						fmt.Println("Removing:", savedVar.FullPath())
-						if err := AppFs.Remove(savedVar.FullPath()); err != nil {
+						fmt.Println("Removing:", savedVar.Path())
+						if err := AppFs.Remove(savedVar.Path()); err != nil {
 							red.Printf("Error removing %s: %s\n", savedVar.FileInfo.Name(), err)
 						}
 					}

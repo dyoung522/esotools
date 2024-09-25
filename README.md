@@ -27,7 +27,7 @@ Feel free to rename them to `esotools` on your particular system for ease of use
 
 Upon launch, the tool will attempt to auto-discover your ESO_HOME directory. If it cannot, it will prompt you to enter it manually.
 
-This is usually in `%Documents%\Elder Scrolls Online` on Windows or `${HOME}/Documents/Elder Scrolls Online` on MacOS / Linux.
+This is usually in `My Documents\Elder Scrolls Online` on Windows or `${HOME}/Documents/Elder Scrolls Online` on MacOS / Linux.
 
 Optionally, you can specify the `--esohome` flag, set an `ESO_HOME` environment variable, or create a `.esotools` file in your HOME directory with the following contents:
 
